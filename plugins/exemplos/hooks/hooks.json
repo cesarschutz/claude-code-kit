@@ -1,0 +1,15 @@
+{
+  "description": "Hook de exemplo: uma linha de contexto no início de cada sessão",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Plugin exemplos (claude-code-kit) ativo: skill /exemplos:explicar-mudancas e agente exemplos:revisor.'"
+          }
+        ]
+      }
+    ]
+  }
+}
