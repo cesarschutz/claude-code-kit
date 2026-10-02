@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 178" width="900" height="178" role="img" aria-label="A linha de resumo acima do prompt: depois de um turno, os tokens e o custo trazem entre parênteses o que ele somou">
+<title>A linha de resumo acima do prompt: depois de um turno, os tokens e o custo trazem entre parênteses o que ele somou</title>
+<style>
+text{font:12px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+@keyframes surgir{from{opacity:0}to{opacity:1}}
+.c1{animation:surgir .4s 1.40s both}
+.c2{animation:surgir .4s 1.90s both}
+.q3{opacity:0;animation:q3 1.6s 1.4s both}@keyframes q3{0%,99.80%{opacity:1}100.00%,100%{opacity:0}}
+.q4{opacity:1;animation:q4 1.6s 1.4s both}@keyframes q4{0%,99.8%{opacity:0}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="900" height="178" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="900" height="178" fill="#262626"/>
+<path d="M25.5 26.1l3.6 3.6l-3.6 3.6" fill="none" stroke="#999999" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="38.4" y="26.8" width="330" height="6.0" rx="2" fill="#6e6e6e"/>
+<g class="c1">
+<circle cx="27.6" cy="58.0" r="3.2" fill="#e8e8e8"/>
+<rect x="38.4" y="54.8" width="420" height="6.0" rx="2" fill="#4a4a4a"/>
+</g>
+<g class="c2">
+<rect x="38.4" y="74.8" width="300" height="6.0" rx="2" fill="#4a4a4a"/>
+</g>
+<rect x="24.0" y="102.0" width="36.0" height="17.0" fill="#b1b9f9"/>
+<text x="31.2" y="114" fill="#262626" textLength="21.6" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="67.2" y="114" fill="#e8e8e8" textLength="50.4" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<g class="q3">
+<text x="132.0" y="114" fill="#b1b9f9" textLength="612.0" lengthAdjust="spacing" xml:space="preserve">contexto 21% · 43,7k tokens · US$ 0,13 · limite 5h 17%, 7d 64% · agentes 2 concluídos</text>
+</g>
+<g class="q4">
+<text x="132.0" y="114" fill="#b1b9f9" textLength="727.2" lengthAdjust="spacing" xml:space="preserve">contexto 22% · 44,8k tokens (+1,1k) · US$ 0,15 (+0,02) · limite 5h 17%, 7d 64% · agentes 2 concluídos</text>
+</g>
+<path d="M24 134L876 134" stroke="#4a4a4a" stroke-width="1"/>
+<path d="M25.5 147.1l3.6 3.6l-3.6 3.6" fill="none" stroke="#e8e8e8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="38.4" y="144" width="7.2" height="14" fill="#e8e8e8"/>
+<path d="M24 168L876 168" stroke="#4a4a4a" stroke-width="1"/>
+</g>
+<rect x=".5" y=".5" width="899" height="177" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>

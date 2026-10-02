@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 680" width="760" height="680" role="img" aria-label="Detalhe de um agente: contexto e custo, tokens, o pedido que recebeu, as chamadas na ordem e a resposta final">
+<title>Detalhe de um agente: contexto e custo, tokens, o pedido que recebeu, as chamadas na ordem e a resposta final</title>
+<style>
+text{font:13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+@keyframes surgir{from{opacity:0}to{opacity:1}}
+.c1{animation:surgir .4s 0.60s both}
+.c2{animation:surgir .4s 0.88s both}
+.c3{animation:surgir .4s 1.16s both}
+.c4{animation:surgir .4s 1.44s both}
+.c5{animation:surgir .4s 1.72s both}
+.c6{animation:surgir .4s 2.00s both}
+.c7{animation:surgir .4s 2.28s both}
+.c8{animation:surgir .4s 2.56s both}
+.c9{animation:surgir .4s 2.84s both}
+.c10{animation:surgir .4s 3.42s both}
+.c11{animation:surgir .4s 3.42s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="760" height="680" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="760" height="680" fill="#262626"/>
+<rect x="24.0" y="27.0" width="39.0" height="18.5" fill="#b1b9f9"/>
+<text x="31.8" y="40" fill="#262626" textLength="23.4" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="70.8" y="40" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<text x="24.0" y="62" fill="#d77757" textLength="78.0" lengthAdjust="spacing" xml:space="preserve" class="n">1: Agentes</text>
+<path d="M24 65L102.0 65" stroke="#d77757" stroke-width="1"/>
+<text x="117.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="125.4" y="62" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="195.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="203.4" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="297.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="304.8" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="398.4" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="406.2" y="62" fill="#999999" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<path d="M24 76L736 76" stroke="#4a4a4a" stroke-width="1"/>
+<text x="24.0" y="108" fill="#e8e8e8" textLength="312.0" lengthAdjust="spacing" xml:space="preserve" class="n">[ ‹ Voltar (v) ] [ Reler mensagens (m) ]</text>
+<path d="M24.8 145.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="150" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve" class="n">Explore</text>
+<text x="94.2" y="150" fill="#999999" textLength="241.8" lengthAdjust="spacing" xml:space="preserve"> · haiku-4-5 · 28s · 9 chamadas</text>
+<text x="24.0" y="171" fill="#e8e8e8" textLength="226.2" lengthAdjust="spacing" xml:space="preserve">Analisar cobertura dos testes</text>
+<text x="24.0" y="213" fill="#e8e8e8" textLength="124.8" lengthAdjust="spacing" xml:space="preserve" class="n">Contexto e custo</text>
+<text x="24.0" y="234" fill="#e8e8e8" textLength="319.8" lengthAdjust="spacing" xml:space="preserve">Contexto do agente 16,4k · custo US$ 0,04</text>
+<text x="24.0" y="276" fill="#e8e8e8" textLength="46.8" lengthAdjust="spacing" xml:space="preserve" class="n">Tokens</text>
+<text x="24.0" y="297" fill="#e8e8e8" textLength="397.8" lengthAdjust="spacing" xml:space="preserve">Entrada 138,7k (128,5k lidos do cache) · saída 2,5k</text>
+<text x="24.0" y="339" fill="#e8e8e8" textLength="210.6" lengthAdjust="spacing" xml:space="preserve" class="n">Pedido que o agente recebeu</text>
+<text x="24.0" y="360" fill="#999999" textLength="663.0" lengthAdjust="spacing" xml:space="preserve">Explore a pasta test/. Identifique todos os arquivos de teste e resuma o que cada um…</text>
+<text x="24.0" y="402" fill="#e8e8e8" textLength="93.6" lengthAdjust="spacing" xml:space="preserve" class="n">Chamadas (9)</text>
+<g class="c1">
+<path d="M24.8 418.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="423" fill="#e8e8e8" textLength="522.6" lengthAdjust="spacing" xml:space="preserve">Bash find . -type f -name "*.test.*" -o -name "*.spec.*" | head -20</text>
+<text x="562.2" y="423" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,1s</text>
+</g>
+<g class="c2">
+<path d="M24.8 439.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="444" fill="#e8e8e8" textLength="85.8" lengthAdjust="spacing" xml:space="preserve">Bash ls -la</text>
+<text x="125.4" y="444" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,0s</text>
+</g>
+<g class="c3">
+<path d="M24.8 460.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="465" fill="#e8e8e8" textLength="226.2" lengthAdjust="spacing" xml:space="preserve">Bash find test -type f | sort</text>
+<text x="265.8" y="465" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,1s</text>
+</g>
+<g class="c4">
+<path d="M25.0 478.2l5.5 6.5m0 -6.5l-5.5 6.5" fill="none" stroke="#ff6b80" stroke-width="1.6" stroke-linecap="round"/>
+<text x="39.6" y="486" fill="#e8e8e8" textLength="148.2" lengthAdjust="spacing" xml:space="preserve">Bash tree test -L 3</text>
+<text x="187.8" y="486" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,0s</text>
+</g>
+<g class="c5">
+<path d="M24.8 502.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="507" fill="#e8e8e8" textLength="171.6" lengthAdjust="spacing" xml:space="preserve">Bash find test -type d</text>
+<text x="211.2" y="507" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,1s</text>
+</g>
+<g class="c6">
+<path d="M24.8 523.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="528" fill="#e8e8e8" textLength="202.8" lengthAdjust="spacing" xml:space="preserve">Read test/carrinho.test.js</text>
+<text x="242.4" y="528" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,1s</text>
+</g>
+<g class="c7">
+<path d="M24.8 544.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="549" fill="#e8e8e8" textLength="156.0" lengthAdjust="spacing" xml:space="preserve">Read src/carrinho.js</text>
+<text x="195.6" y="549" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,0s</text>
+</g>
+<g class="c8">
+<path d="M24.8 565.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="570" fill="#e8e8e8" textLength="140.4" lengthAdjust="spacing" xml:space="preserve">Read src/precos.js</text>
+<text x="180.0" y="570" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,0s</text>
+</g>
+<g class="c9">
+<path d="M24.8 586.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="39.6" y="591" fill="#e8e8e8" textLength="265.2" lengthAdjust="spacing" xml:space="preserve">Bash find src -type f -name "*.js"</text>
+<text x="304.8" y="591" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve"> · 0,1s</text>
+</g>
+<g class="c10">
+<text x="24.0" y="633" fill="#e8e8e8" textLength="109.2" lengthAdjust="spacing" xml:space="preserve" class="n">Resposta final</text>
+</g>
+<g class="c11">
+<text x="24.0" y="654" fill="#e8e8e8" textLength="304.2" lengthAdjust="spacing" xml:space="preserve" class="n">Resumo da Exploração da Pasta de Testes</text>
+</g>
+</g>
+<rect x=".5" y=".5" width="759" height="679" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>

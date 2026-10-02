@@ -15,8 +15,10 @@ passaram por ali. Mais uma linha de resumo acima do prompt.
 > ferramenta nem uma resposta do modelo: todos repassam o que receberam e devolvem o resultado
 > como veio.
 
-O desenho do topo é uma ilustração da tela. Os prints das abas, mais abaixo, vêm de uma sessão
-real no terminal (Claude Code 2.1.287, modelo Haiku 4.5), num projeto de exemplo.
+As imagens desta página são desenhos, não capturas de tela. Os textos e os números vêm de uma
+sessão real no terminal (Claude Code 2.1.287, modelo Haiku 4.5), num projeto de exemplo; os prints
+dessa sessão estão em [`docs/csr-cockpit`](../../docs/csr-cockpit). Cada desenho se move uma vez
+ao carregar a página e para.
 
 ## Requisitos
 
@@ -56,7 +58,7 @@ abas.
 
 Fica acima do prompt o tempo todo, com o painel aberto ou fechado:
 
-<img src="../../docs/csr-cockpit/linha-de-resumo.png" width="860" alt="Linha de resumo acima do prompt: contexto, tokens, custo, limite de uso e agentes">
+<img src="../../docs/arte/linha-de-resumo.svg" width="860" alt="A linha de resumo acima do prompt: depois de um turno, os tokens e o custo trazem entre parênteses o que ele somou">
 
 | Parte | O que diz |
 |---|---|
@@ -86,9 +88,7 @@ tamanho do contexto do próprio agente, quanto ele custou, o número de chamadas
 recebeu e a atividade atual (última ferramenta e argumento). Nos concluídos, a duração, o total de
 tokens e a primeira linha do resultado.
 
-<img src="../../docs/csr-cockpit/agentes-rodando.png" width="720" alt="Aba Agentes com dois subagentes rodando: modelo, tempo, contexto, custo e a chamada em curso de cada um">
-
-<img src="../../docs/csr-cockpit/agentes.png" width="720" alt="Aba Agentes com dois subagentes concluídos, com contexto, custo, chamadas e tokens">
+<img src="../../docs/arte/painel-agentes.svg" width="720" alt="Aba Agentes: dois subagentes começam, trabalham e terminam, cada um com modelo, tempo, contexto, custo e chamadas">
 
 ### 2 Diffs
 
@@ -98,7 +98,7 @@ Cada Edit e Write do loop principal, agrupado por turno (os últimos 10). Um dif
 número de linha, caminho do arquivo e contagem de linhas que entraram e saíram. No Write sobre um
 arquivo que já existia, o conteúdo antigo é lido antes da escrita, para o diff ser o real.
 
-<img src="../../docs/csr-cockpit/diffs.png" width="720" alt="Aba Diffs com a edição de um arquivo: linhas que entraram em verde">
+<img src="../../docs/arte/painel-diffs.svg" width="720" alt="Aba Diffs: a edição de um arquivo, com a linha que saiu em vermelho e a que entrou em verde">
 
 ### 3 Contexto
 
@@ -111,7 +111,7 @@ local, atualizada a cada turno, sem requisição extra. O botão "Contagem exata
 pela contagem de verdade, que faz uma requisição por ferramenta e por arquivo de memória; por isso
 só acontece quando é apertado.
 
-<img src="../../docs/csr-cockpit/contexto.png" width="720" alt="Aba Contexto: percentual usado, gráfico dos turnos, custo, limite de uso e detalhamento por categoria">
+<img src="../../docs/arte/painel-contexto.svg" width="720" alt="Aba Contexto: percentual usado, gráfico dos turnos, custo, limite de uso e detalhamento por categoria">
 
 ### 4 Arquivos
 
@@ -121,7 +121,7 @@ Arquivos lidos (caminho, quantas vezes e por quem) e comandos Bash (status, exit
 quem rodou), com um campo de filtro. A pasta do projeto some dos comandos mostrados
 (`find /pasta/do/projeto/src` aparece como `find src`); o detalhe traz o comando inteiro.
 
-<img src="../../docs/csr-cockpit/arquivos.png" width="720" alt="Aba Arquivos: arquivos lidos por quem, e comandos Bash com sucesso em verde e falha em vermelho">
+<img src="../../docs/arte/painel-arquivos.svg" width="720" alt="Aba Arquivos: arquivos lidos, com quem leu, e comandos Bash com sucesso em verde e falha em vermelho">
 
 ### 5 Turnos
 
@@ -132,7 +132,7 @@ quanto o turno somou ao contexto, quanto custou, quantas ferramentas foram chama
 falharam e quantas edições houve. No alto, o custo total da sessão. O turno em curso aparece em
 andamento.
 
-<img src="../../docs/csr-cockpit/turnos.png" width="720" alt="Aba Turnos: três turnos com duração, contexto somado, custo, ferramentas e falhas">
+<img src="../../docs/arte/painel-turnos.svg" width="720" alt="Aba Turnos: três turnos com duração, contexto somado, custo, ferramentas e falhas">
 
 ## Detalhes
 
@@ -147,7 +147,7 @@ sublinhado.
 - **Turno.** O pedido e a resposta inteiros, quantas vezes cada ferramenta foi chamada e, quando
   houve agentes em segundo plano, o que o Claude respondeu depois do retorno de cada um.
 
-<img src="../../docs/csr-cockpit/agente-detalhe.png" width="720" alt="Detalhe de um agente: contexto e custo, tokens, pedido, chamadas e resposta final">
+<img src="../../docs/arte/painel-agente.svg" width="720" alt="Detalhe de um agente: contexto e custo, tokens, o pedido que recebeu, as chamadas na ordem e a resposta final">
 
 ### Turnos agrupados
 

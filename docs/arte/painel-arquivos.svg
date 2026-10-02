@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" width="760" height="470" role="img" aria-label="Aba Arquivos: arquivos lidos, com quem leu, e comandos Bash com sucesso em verde e falha em vermelho">
+<title>Aba Arquivos: arquivos lidos, com quem leu, e comandos Bash com sucesso em verde e falha em vermelho</title>
+<style>
+text{font:13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+@keyframes surgir{from{opacity:0}to{opacity:1}}
+.c1{animation:surgir .4s 2.70s both}
+.c2{animation:surgir .4s 2.40s both}
+.c3{animation:surgir .4s 2.10s both}
+.c4{animation:surgir .4s 1.80s both}
+.c5{animation:surgir .4s 1.50s both}
+.c6{animation:surgir .4s 1.20s both}
+.c7{animation:surgir .4s 0.90s both}
+.c8{animation:surgir .4s 0.60s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="760" height="470" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="760" height="470" fill="#262626"/>
+<rect x="24.0" y="27.0" width="39.0" height="18.5" fill="#b1b9f9"/>
+<text x="31.8" y="40" fill="#262626" textLength="23.4" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="70.8" y="40" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<text x="24.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="31.8" y="62" fill="#999999" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="117.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="125.4" y="62" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="195.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="203.4" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="297.0" y="62" fill="#d77757" textLength="85.8" lengthAdjust="spacing" xml:space="preserve" class="n">4: Arquivos</text>
+<path d="M297.0 65L382.8 65" stroke="#d77757" stroke-width="1"/>
+<text x="398.4" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="406.2" y="62" fill="#999999" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<path d="M24 76L736 76" stroke="#4a4a4a" stroke-width="1"/>
+<text x="24.0" y="108" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">Filtro: </text>
+<text x="86.4" y="108" fill="#999999" textLength="241.8" lengthAdjust="spacing" xml:space="preserve">trecho do caminho ou do comando</text>
+<text x="24.0" y="150" fill="#e8e8e8" textLength="140.4" lengthAdjust="spacing" xml:space="preserve" class="n">Arquivos lidos (4)</text>
+<text x="24.0" y="171" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  1× </text>
+<text x="63.0" y="171" fill="#e8e8e8" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">README.md</text>
+<text x="133.2" y="171" fill="#999999" textLength="93.6" lengthAdjust="spacing" xml:space="preserve"> · principal</text>
+<text x="24.0" y="192" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  3× </text>
+<text x="63.0" y="192" fill="#e8e8e8" textLength="117.0" lengthAdjust="spacing" xml:space="preserve">src/carrinho.js</text>
+<text x="180.0" y="192" fill="#999999" textLength="163.8" lengthAdjust="spacing" xml:space="preserve"> · Explore, principal</text>
+<text x="24.0" y="213" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  1× </text>
+<text x="63.0" y="213" fill="#e8e8e8" textLength="101.4" lengthAdjust="spacing" xml:space="preserve">src/precos.js</text>
+<text x="164.4" y="213" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve"> · Explore</text>
+<text x="24.0" y="234" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  1× </text>
+<text x="63.0" y="234" fill="#e8e8e8" textLength="163.8" lengthAdjust="spacing" xml:space="preserve">test/carrinho.test.js</text>
+<text x="226.8" y="234" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve"> · Explore</text>
+<text x="24.0" y="276" fill="#e8e8e8" textLength="132.6" lengthAdjust="spacing" xml:space="preserve" class="n">Comandos Bash (8)</text>
+<g class="c1">
+<path d="M25.0 288.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="297" fill="#e8e8e8" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">npm test </text>
+<path d="M110.6 292.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="125.4" y="297" fill="#999999" textLength="31.2" lengthAdjust="spacing" xml:space="preserve">0,5s</text>
+</g>
+<g class="c2">
+<path d="M25.0 309.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="318" fill="#e8e8e8" textLength="234.0" lengthAdjust="spacing" xml:space="preserve">find src -type f -name "*.js" </text>
+<path d="M274.4 313.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="289.2" y="318" fill="#999999" textLength="109.2" lengthAdjust="spacing" xml:space="preserve">0,1s · Explore</text>
+</g>
+<g class="c3">
+<path d="M25.0 330.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="339" fill="#e8e8e8" textLength="140.4" lengthAdjust="spacing" xml:space="preserve">find test -type d </text>
+<path d="M180.8 334.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="195.6" y="339" fill="#999999" textLength="109.2" lengthAdjust="spacing" xml:space="preserve">0,1s · Explore</text>
+</g>
+<g class="c4">
+<path d="M25.0 351.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="360" fill="#e8e8e8" textLength="117.0" lengthAdjust="spacing" xml:space="preserve">tree test -L 3 </text>
+<path d="M157.6 352.2l5.5 6.5m0 -6.5l-5.5 6.5" fill="none" stroke="#ff6b80" stroke-width="1.6" stroke-linecap="round"/>
+<text x="172.2" y="360" fill="#999999" textLength="195.0" lengthAdjust="spacing" xml:space="preserve">exit 127 · 0,0s · Explore</text>
+</g>
+<g class="c5">
+<path d="M25.0 372.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="381" fill="#e8e8e8" textLength="195.0" lengthAdjust="spacing" xml:space="preserve">find test -type f | sort </text>
+<path d="M235.4 376.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="250.2" y="381" fill="#999999" textLength="109.2" lengthAdjust="spacing" xml:space="preserve">0,1s · Explore</text>
+</g>
+<g class="c6">
+<path d="M25.0 393.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="402" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve">ls -la </text>
+<path d="M95.0 397.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="109.8" y="402" fill="#999999" textLength="109.2" lengthAdjust="spacing" xml:space="preserve">0,0s · Explore</text>
+</g>
+<g class="c7">
+<path d="M25.0 414.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="423" fill="#e8e8e8" textLength="491.4" lengthAdjust="spacing" xml:space="preserve">find . -type f -name "*.test.*" -o -name "*.spec.*" | head -20 </text>
+<path d="M531.8 418.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="546.6" y="423" fill="#999999" textLength="109.2" lengthAdjust="spacing" xml:space="preserve">0,1s · Explore</text>
+</g>
+<g class="c8">
+<path d="M25.0 435.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="444" fill="#e8e8e8" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">npm test </text>
+<path d="M110.8 436.2l5.5 6.5m0 -6.5l-5.5 6.5" fill="none" stroke="#ff6b80" stroke-width="1.6" stroke-linecap="round"/>
+<text x="125.4" y="444" fill="#999999" textLength="101.4" lengthAdjust="spacing" xml:space="preserve">exit 1 · 0,5s</text>
+</g>
+</g>
+<rect x=".5" y=".5" width="759" height="469" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>

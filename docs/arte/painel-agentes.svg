@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 323" width="760" height="323" role="img" aria-label="Aba Agentes: dois subagentes começam, trabalham e terminam, cada um com modelo, tempo, contexto, custo e chamadas">
+<title>Aba Agentes: dois subagentes começam, trabalham e terminam, cada um com modelo, tempo, contexto, custo e chamadas</title>
+<style>
+text{font:13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+.q1{opacity:0;animation:q1 5.2s 1.2s both}@keyframes q1{0%,49.80%{opacity:1}50.00%,100%{opacity:0}}
+.q2{opacity:0;animation:q2 5.2s 1.2s both}@keyframes q2{0%,49.80%{opacity:0}50.00%,99.80%{opacity:1}100.00%,100%{opacity:0}}
+.q3{opacity:1;animation:q3 5.2s 1.2s both}@keyframes q3{0%,99.8%{opacity:0}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="760" height="323" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="760" height="323" fill="#262626"/>
+<rect x="24.0" y="27.0" width="39.0" height="18.5" fill="#b1b9f9"/>
+<text x="31.8" y="40" fill="#262626" textLength="23.4" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="70.8" y="40" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<text x="24.0" y="62" fill="#d77757" textLength="78.0" lengthAdjust="spacing" xml:space="preserve" class="n">1: Agentes</text>
+<path d="M24 65L102.0 65" stroke="#d77757" stroke-width="1"/>
+<text x="117.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="125.4" y="62" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="195.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="203.4" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="297.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="304.8" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="398.4" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="406.2" y="62" fill="#999999" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<path d="M24 76L736 76" stroke="#4a4a4a" stroke-width="1"/>
+<g class="q1">
+<text x="24.0" y="108" fill="#b1b9f9" textLength="85.8" lengthAdjust="spacing" xml:space="preserve" class="n">Rodando (2)</text>
+<path d="M25.0 120.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="129" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<circle cx="105.9" cy="124.7" r="3.5" fill="#b1b9f9"/>
+<text x="117.6" y="129" fill="#999999" textLength="124.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 2,1s</text>
+<text x="24.0" y="150" fill="#e8e8e8" textLength="273.0" lengthAdjust="spacing" xml:space="preserve">  Listar funções em src/carrinho.js</text>
+<text x="24.0" y="171" fill="#999999" textLength="85.8" lengthAdjust="spacing" xml:space="preserve">  iniciando</text>
+<path d="M25.0 183.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="192" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<circle cx="105.9" cy="187.7" r="3.5" fill="#b1b9f9"/>
+<text x="117.6" y="192" fill="#999999" textLength="124.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 1,4s</text>
+<text x="24.0" y="213" fill="#e8e8e8" textLength="241.8" lengthAdjust="spacing" xml:space="preserve">  Analisar cobertura dos testes</text>
+<text x="24.0" y="234" fill="#999999" textLength="85.8" lengthAdjust="spacing" xml:space="preserve">  iniciando</text>
+<text x="24.0" y="276" fill="#e8e8e8" textLength="109.2" lengthAdjust="spacing" xml:space="preserve" class="n">Concluídos (0)</text>
+<text x="24.0" y="297" fill="#999999" textLength="210.6" lengthAdjust="spacing" xml:space="preserve">Nenhum subagente concluído.</text>
+</g>
+<g class="q2">
+<text x="24.0" y="108" fill="#b1b9f9" textLength="85.8" lengthAdjust="spacing" xml:space="preserve" class="n">Rodando (2)</text>
+<path d="M25.0 120.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="129" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<circle cx="105.9" cy="124.7" r="3.5" fill="#b1b9f9"/>
+<text x="117.6" y="129" fill="#999999" textLength="436.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 6,4s · contexto 11,2k · US$ 0,02 · 1 chamada</text>
+<text x="24.0" y="150" fill="#e8e8e8" textLength="273.0" lengthAdjust="spacing" xml:space="preserve">  Listar funções em src/carrinho.js</text>
+<text x="24.0" y="171" fill="#999999" textLength="171.6" lengthAdjust="spacing" xml:space="preserve">  Read src/carrinho.js</text>
+<path d="M25.0 183.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="192" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<circle cx="105.9" cy="187.7" r="3.5" fill="#b1b9f9"/>
+<text x="117.6" y="192" fill="#999999" textLength="436.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 5,6s · contexto 11,2k · US$ 0,01 · 1 chamada</text>
+<text x="24.0" y="213" fill="#e8e8e8" textLength="241.8" lengthAdjust="spacing" xml:space="preserve">  Analisar cobertura dos testes</text>
+<text x="24.0" y="234" fill="#999999" textLength="538.2" lengthAdjust="spacing" xml:space="preserve">  Bash find . -type f -name "*.test.*" -o -name "*.spec.*" | head -20</text>
+<text x="24.0" y="276" fill="#e8e8e8" textLength="109.2" lengthAdjust="spacing" xml:space="preserve" class="n">Concluídos (0)</text>
+<text x="24.0" y="297" fill="#999999" textLength="210.6" lengthAdjust="spacing" xml:space="preserve">Nenhum subagente concluído.</text>
+</g>
+<g class="q3">
+<text x="24.0" y="108" fill="#b1b9f9" textLength="85.8" lengthAdjust="spacing" xml:space="preserve" class="n">Rodando (0)</text>
+<text x="24.0" y="129" fill="#999999" textLength="195.0" lengthAdjust="spacing" xml:space="preserve">Nenhum subagente rodando.</text>
+<text x="24.0" y="171" fill="#e8e8e8" textLength="109.2" lengthAdjust="spacing" xml:space="preserve" class="n">Concluídos (2)</text>
+<path d="M25.0 183.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="192" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<path d="M102.8 187.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="117.6" y="192" fill="#999999" textLength="561.6" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 28s · contexto 16,4k · US$ 0,04 · 9 chamadas · 141,2k tokens</text>
+<text x="24.0" y="213" fill="#e8e8e8" textLength="241.8" lengthAdjust="spacing" xml:space="preserve">  Analisar cobertura dos testes</text>
+<text x="24.0" y="234" fill="#999999" textLength="343.2" lengthAdjust="spacing" xml:space="preserve">  ## Resumo da Exploração da Pasta de Testes</text>
+<path d="M25.0 246.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="255" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<path d="M102.8 250.8l2.2 2.6l4.2 -6.5" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="117.6" y="255" fill="#999999" textLength="553.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 7,5s · contexto 13,3k · US$ 0,02 · 1 chamada · 24,5k tokens</text>
+<text x="24.0" y="276" fill="#e8e8e8" textLength="273.0" lengthAdjust="spacing" xml:space="preserve">  Listar funções em src/carrinho.js</text>
+<text x="24.0" y="297" fill="#999999" textLength="319.8" lengthAdjust="spacing" xml:space="preserve">  ## Funções no arquivo `src/carrinho.js`</text>
+</g>
+</g>
+<rect x=".5" y=".5" width="759" height="322" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>

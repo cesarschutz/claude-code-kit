@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 386" width="760" height="386" role="img" aria-label="Aba Turnos: três turnos com duração, contexto somado, custo, ferramentas e falhas">
+<title>Aba Turnos: três turnos com duração, contexto somado, custo, ferramentas e falhas</title>
+<style>
+text{font:13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+@keyframes surgir{from{opacity:0}to{opacity:1}}
+.c1{animation:surgir .4s 2.40s both}
+.c2{animation:surgir .4s 2.40s both}
+.c3{animation:surgir .4s 2.40s both}
+.c4{animation:surgir .4s 1.50s both}
+.c5{animation:surgir .4s 1.50s both}
+.c6{animation:surgir .4s 1.50s both}
+.c7{animation:surgir .4s 0.60s both}
+.c8{animation:surgir .4s 0.60s both}
+.c9{animation:surgir .4s 0.60s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="760" height="386" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="760" height="386" fill="#262626"/>
+<rect x="24.0" y="27.0" width="39.0" height="18.5" fill="#b1b9f9"/>
+<text x="31.8" y="40" fill="#262626" textLength="23.4" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="70.8" y="40" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<text x="24.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="31.8" y="62" fill="#999999" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="117.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="125.4" y="62" fill="#999999" textLength="54.6" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="195.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="203.4" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="297.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="304.8" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="398.4" y="62" fill="#d77757" textLength="70.2" lengthAdjust="spacing" xml:space="preserve" class="n">5: Turnos</text>
+<path d="M398.40000000000003 65L468.6 65" stroke="#d77757" stroke-width="1"/>
+<path d="M24 76L736 76" stroke="#4a4a4a" stroke-width="1"/>
+<text x="24.0" y="108" fill="#e8e8e8" textLength="78.0" lengthAdjust="spacing" xml:space="preserve" class="n">Turnos (3)</text>
+<text x="102.0" y="108" fill="#999999" textLength="163.8" lengthAdjust="spacing" xml:space="preserve"> · US$ 0,15 na sessão</text>
+<g class="c1">
+<path d="M25.0 141.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="150" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">Turno 3 </text>
+<text x="102.0" y="150" fill="#999999" textLength="31.2" lengthAdjust="spacing" xml:space="preserve">7,5s</text>
+</g>
+<g class="c2">
+<text x="24.0" y="171" fill="#e8e8e8" textLength="616.2" lengthAdjust="spacing" xml:space="preserve">  Acrescente ao README.md uma linha dizendo que o cupom DEZ dá 10% de desconto.</text>
+</g>
+<g class="c3">
+<text x="24.0" y="192" fill="#999999" textLength="444.6" lengthAdjust="spacing" xml:space="preserve">  +1,1k de contexto · US$ 0,02 · 2 ferramentas · 1 edição</text>
+</g>
+<g class="c4">
+<path d="M25.0 225.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="234" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">Turno 2 </text>
+<text x="102.0" y="234" fill="#999999" textLength="31.2" lengthAdjust="spacing" xml:space="preserve">9,3s</text>
+</g>
+<g class="c5">
+<text x="24.0" y="255" fill="#e8e8e8" textLength="569.4" lengthAdjust="spacing" xml:space="preserve">  Corrija o desconto do cupom em src/carrinho.js e rode npm test de novo.</text>
+</g>
+<g class="c6">
+<text x="24.0" y="276" fill="#999999" textLength="444.6" lengthAdjust="spacing" xml:space="preserve">  +1,9k de contexto · US$ 0,02 · 3 ferramentas · 1 edição</text>
+</g>
+<g class="c7">
+<path d="M25.0 309.9v7.3l5.5 -3.6z" fill="#e8e8e8"/>
+<text x="39.6" y="318" fill="#e8e8e8" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">Turno 1 </text>
+<text x="102.0" y="318" fill="#999999" textLength="23.4" lengthAdjust="spacing" xml:space="preserve">27s</text>
+<text x="125.4" y="318" fill="#ff6b80" textLength="85.8" lengthAdjust="spacing" xml:space="preserve"> · 2 falhas</text>
+</g>
+<g class="c8">
+<text x="24.0" y="339" fill="#e8e8e8" textLength="639.6" lengthAdjust="spacing" xml:space="preserve">  Rode 2 agentes Explore ao mesmo tempo, em segundo plano: um lista as funções de…</text>
+</g>
+<g class="c9">
+<text x="24.0" y="360" fill="#999999" textLength="397.8" lengthAdjust="spacing" xml:space="preserve">  US$ 0,11 · 13 ferramentas · 2 retornos de agentes</text>
+</g>
+</g>
+<rect x=".5" y=".5" width="759" height="385" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>

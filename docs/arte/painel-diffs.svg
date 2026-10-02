@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 428" width="760" height="428" role="img" aria-label="Aba Diffs: a edição de um arquivo, com a linha que saiu em vermelho e a que entrou em verde">
+<title>Aba Diffs: a edição de um arquivo, com a linha que saiu em vermelho e a que entrou em verde</title>
+<style>
+text{font:13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+@keyframes surgir{from{opacity:0}to{opacity:1}}
+.c1{animation:surgir .4s 1.00s both}
+.c2{animation:surgir .4s 1.90s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="760" height="428" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="760" height="428" fill="#262626"/>
+<rect x="24.0" y="27.0" width="39.0" height="18.5" fill="#b1b9f9"/>
+<text x="31.8" y="40" fill="#262626" textLength="23.4" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="70.8" y="40" fill="#e8e8e8" textLength="54.6" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<text x="24.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="31.8" y="62" fill="#999999" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="117.6" y="62" fill="#d77757" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">2: Diffs</text>
+<path d="M117.6 65L180.0 65" stroke="#d77757" stroke-width="1"/>
+<text x="195.6" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="203.4" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="297.0" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="304.8" y="62" fill="#999999" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="398.4" y="62" fill="#b1b9f9" textLength="7.8" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="406.2" y="62" fill="#999999" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<path d="M24 76L736 76" stroke="#4a4a4a" stroke-width="1"/>
+<text x="24.0" y="108" fill="#e8e8e8" textLength="241.8" lengthAdjust="spacing" xml:space="preserve" class="n">Turno 2 · 1 edição em 1 arquivo</text>
+<text x="24.0" y="129" fill="#e8e8e8" textLength="39.0" lengthAdjust="spacing" xml:space="preserve" class="n">[ 1 ]</text>
+<text x="24.0" y="171" fill="#e8e8e8" textLength="117.0" lengthAdjust="spacing" xml:space="preserve" class="n">src/carrinho.js</text>
+<text x="141.0" y="171" fill="#999999" textLength="101.4" lengthAdjust="spacing" xml:space="preserve">  +1 −1  Edit</text>
+<text x="24.0" y="192" fill="#999999" textLength="117.0" lengthAdjust="spacing" xml:space="preserve">@@ -9,7 +9,7 @@</text>
+<text x="24.0" y="213" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">   9 </text>
+<text x="63.0" y="213" fill="#e8e8e8" textLength="140.4" lengthAdjust="spacing" xml:space="preserve">      return valor</text>
+<text x="24.0" y="234" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  10 </text>
+<text x="63.0" y="234" fill="#e8e8e8" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">    }</text>
+<text x="24.0" y="255" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  11 </text>
+<g class="c1">
+<text x="24.0" y="276" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  12 </text>
+<text x="63.0" y="276" fill="#ff6b80" textLength="241.8" lengthAdjust="spacing" xml:space="preserve">−   return valor - valor * 0.01</text>
+</g>
+<g class="c2">
+<text x="24.0" y="297" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  12 </text>
+<text x="63.0" y="297" fill="#4eba65" textLength="234.0" lengthAdjust="spacing" xml:space="preserve">+   return valor - valor * 0.1</text>
+</g>
+<text x="24.0" y="318" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  13 </text>
+<text x="63.0" y="318" fill="#e8e8e8" textLength="23.4" lengthAdjust="spacing" xml:space="preserve">  }</text>
+<text x="24.0" y="339" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  14 </text>
+<text x="24.0" y="360" fill="#999999" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">  15 </text>
+<text x="63.0" y="360" fill="#e8e8e8" textLength="616.2" lengthAdjust="spacing" xml:space="preserve">  export const frete = valor =&gt; (valor &gt;= FRETE_GRATIS_A_PARTIR_DE ? 0 : FRETE)</text>
+<text x="24.0" y="402" fill="#e8e8e8" textLength="429.0" lengthAdjust="spacing" xml:space="preserve" class="n">[ Anterior (p) ] [ Próximo (n) ] [ Turno anterior (t) ]</text>
+</g>
+<rect x=".5" y=".5" width="759" height="427" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>
