@@ -73,6 +73,9 @@ export type CockpitDetalhe = {
   total: number
   janela: number
   modelo: string
+  // O turno em que foi calculado, e se é a contagem exata ou a estimativa local.
+  turno?: number
+  isExato?: boolean
 }
 
 export type CockpitContexto = {

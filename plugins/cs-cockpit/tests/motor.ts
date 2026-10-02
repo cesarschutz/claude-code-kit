@@ -46,13 +46,15 @@ const usoInicial = (): SessionUsage => ({
   cost: { usd: 1 },
 })
 
-const DETALHE: NonNullable<SessionUsage['context']['breakdown']> = {
+// A estimativa ('summary') e a contagem exata ('full') diferem nas mensagens,
+// para os testes saberem qual das duas o painel mostra.
+const detalhe = (mensagens: number): NonNullable<SessionUsage['context']['breakdown']> => ({
   categories: [
     { name: 'System prompt', tokens: 4200, color: 'promptBorder', isDeferred: false, kind: 'used' },
-    { name: 'Messages', tokens: 120_000, color: 'permission', isDeferred: false, kind: 'used' },
+    { name: 'Messages', tokens: mensagens, color: 'permission', isDeferred: false, kind: 'used' },
     { name: 'Free space', tokens: 42_800, color: 'inactive', isDeferred: false, kind: 'free' },
   ],
-  totalTokens: 124_200,
+  totalTokens: 4200 + mensagens,
   maxTokens: 167_000,
   rawMaxTokens: 167_000,
   autocompactSource: 'model-default',
@@ -64,7 +66,7 @@ const DETALHE: NonNullable<SessionUsage['context']['breakdown']> = {
   agents: [],
   isAutoCompactEnabled: true,
   apiUsage: null,
-}
+})
 
 export const ligar = (on: On): Motor => {
   const relogio = mock.clock(on, { now: AGORA })
@@ -97,7 +99,13 @@ export const ligar = (on: On): Motor => {
       value:
         e.breakdown === undefined
           ? motor.uso
-          : { ...motor.uso, context: { ...motor.uso.context, breakdown: DETALHE } },
+          : {
+              ...motor.uso,
+              context: {
+                ...motor.uso.context,
+                breakdown: detalhe(e.breakdown === 'full' ? 120_000 : 100_000),
+              },
+            },
     }
   })
   on('fs.read', (_, e) => {

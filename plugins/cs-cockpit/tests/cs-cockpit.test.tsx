@@ -185,7 +185,7 @@ test('aba 2, Diffs: Edit e Write do loop principal, por turno, com diff real', a
   }
 })
 
-test('aba 3, Contexto: uso, gráfico, custo, limite e detalhamento só no clique', async ($, on) => {
+test('aba 3, Contexto: uso, gráfico, custo, limite, estimativa a cada turno e contagem exata só no clique', async ($, on) => {
   const motor = ligar(on)
   motor.uso = uso(80_000, 40, 1.2)
   await $.session.start(INICIO)
@@ -220,22 +220,39 @@ test('aba 3, Contexto: uso, gráfico, custo, limite e detalhamento só no clique
     await mostra(ui, 'Limite de uso (5 h)')
     await mostra(ui, /^38%$/)
     await mostra(ui, 'renova em 2h10')
+    // O detalhamento estimado acompanha os turnos, sem ninguém clicar.
+    await mostra(ui, /estimativa do turno 2$/)
+    await mostra(ui, /100k {2}Messages/)
+    expect((await ui.find({ key: 'detalhar' }))?.props.label).toBe('Contagem exata')
     await ui.press({ key: 'aba-1' })
     await ui.unmount()
   }
 
-  // Até aqui, nenhuma contagem de tokens extra foi pedida.
-  expect(motor.visto.usos.filter(pedido => pedido !== 'simples')).toEqual([])
+  // Até aqui só a estimativa local foi pedida: nenhuma contagem de tokens extra.
+  const exatas = () => motor.visto.usos.filter(pedido => pedido === 'full')
+  expect(motor.visto.usos).toContain('summary')
+  expect(exatas()).toEqual([])
 
   const ui = await $.ui.mount({ ...PAINEL, surface: 'desktop', props: painel() })
   await ui.press({ key: 'aba-3' })
-  await naoMostra(ui, 'Messages')
-  expect((await ui.find({ key: 'detalhar' }))?.props.label).toBe('Calcular detalhamento')
   await ui.press({ key: 'detalhar' })
-  expect(motor.visto.usos.filter(pedido => pedido !== 'simples')).toEqual(['full'])
+  expect(exatas()).toEqual(['full'])
+  await mostra(ui, /contagem exata do turno 2$/)
   await mostra(ui, /120k {2}Messages/)
   await mostra(ui, /4,2k {2}System prompt/)
   await mostra(ui, /42,8k {2}Free space/)
+  await mostra(ui, ' (livre)')
+
+  // Outra medição no mesmo turno não troca a contagem exata pela estimativa.
+  await $.session.measure({ ...motor.uso, changed: ['cost'] })
+  await mostra(ui, /120k {2}Messages/)
+
+  // No turno seguinte, a estimativa volta a acompanhar.
+  await $.turn.start({ text: 'c', turnId: 't3' })
+  await $.session.measure({ ...motor.uso, changed: ['context'] })
+  await mostra(ui, /estimativa do turno 3$/)
+  await mostra(ui, /100k {2}Messages/)
+  expect(exatas()).toEqual(['full'])
   await ui.unmount()
 })
 

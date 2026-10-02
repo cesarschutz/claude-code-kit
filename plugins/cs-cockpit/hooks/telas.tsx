@@ -378,6 +378,14 @@ const linhaDeBarra = (
   )
 }
 
+const TIPOS_DE_CATEGORIA = ['used', 'deferred', 'buffer', 'free']
+
+const NOME_DO_TIPO: Readonly<Record<string, string>> = {
+  deferred: 'sob demanda, fora da janela',
+  buffer: 'reserva da compactação',
+  free: 'livre',
+}
+
 const detalhamento = (el: Elementos, contexto: CockpitContexto): RenderElement | null => {
   const { Box, Text } = el
   const detalhe = contexto.detalhe
@@ -386,19 +394,25 @@ const detalhamento = (el: Elementos, contexto: CockpitContexto): RenderElement |
     return null
   }
 
+  // O que ocupa o contexto primeiro; depois o que fica fora dele e o espaço livre.
+  const ordem = (tipo: string): number => Math.max(0, TIPOS_DE_CATEGORIA.indexOf(tipo))
   const linhas = detalhe.categorias
     .filter(categoria => categoria.tokens > 0)
-    .sort((a, b) => b.tokens - a.tokens)
+    .sort((a, b) => ordem(a.tipo) - ordem(b.tipo) || b.tokens - a.tokens)
+  const origem = detalhe.isExato === true ? 'contagem exata' : 'estimativa'
+  const quando = detalhe.turno === undefined || detalhe.turno === 0 ? '' : ` do turno ${detalhe.turno}`
 
   return (
     <Box key="detalhe" flexDirection="column">
       <Text dimColor>
-        {`${tokens(detalhe.total)} de ${tokens(detalhe.janela)} · ${detalhe.modelo}`}
+        {`${tokens(detalhe.total)} de ${tokens(detalhe.janela)} · ${detalhe.modelo} · ${origem}${quando}`}
       </Text>
       {linhas.map(categoria => (
         <Text wrap="truncate-end">
           <Text>{`${tokens(categoria.tokens).padStart(7)}  ${categoria.nome}`}</Text>
-          {categoria.tipo !== 'used' && <Text dimColor>{` (${categoria.tipo})`}</Text>}
+          {categoria.tipo !== 'used' && (
+            <Text dimColor>{` (${NOME_DO_TIPO[categoria.tipo] ?? categoria.tipo})`}</Text>
+          )}
         </Text>
       ))}
     </Box>
@@ -416,7 +430,7 @@ const abaContexto = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
   const botao = (
     <Button
       key="detalhar"
-      label={dados.ui.isCalculando ? 'Calculando…' : 'Calcular detalhamento'}
+      label={dados.ui.isCalculando ? 'Contando…' : 'Contagem exata'}
       onPress={acoes.detalhar}
     />
   )
@@ -479,11 +493,11 @@ const abaContexto = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
       })}
       <Text bold>Detalhamento do contexto</Text>
       <Text dimColor wrap="wrap">
-        Separa quanto é sistema, ferramentas, memória e conversa. Faz uma contagem de tokens
-        extra, por isso fica sob demanda.
+        Estimativa por categoria, atualizada a cada turno, sem requisição extra. A contagem exata
+        faz uma requisição por ferramenta e por arquivo de memória; por isso fica no botão.
       </Text>
-      {botao}
       {detalhamento(el, contexto)}
+      {botao}
     </Box>
   )
 }

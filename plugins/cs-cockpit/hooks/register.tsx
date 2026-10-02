@@ -14,7 +14,13 @@ import type {
   ToolCallResult,
 } from 'claude-code'
 
-import type { CockpitAba, CockpitCategoria, CockpitComando, CockpitEdicao } from '../types'
+import type {
+  CockpitAba,
+  CockpitCategoria,
+  CockpitComando,
+  CockpitDetalhe,
+  CockpitEdicao,
+} from '../types'
 import {
   CONTEXTO_INICIAL,
   UI_INICIAL,
@@ -93,6 +99,45 @@ const gravarMedida = async (
 const medir = async ($: EngineInterface) => {
   const uso = await $.session.usage()
   await gravarMedida($, uso.context, uso.rateLimits, uso.cost)
+}
+
+// O detalhamento do contexto por categoria. 'summary' estima localmente, sem
+// requisição nenhuma; 'full' conta de verdade, com uma requisição por
+// ferramenta e por arquivo de memória. Devolve false quando a sessão não o dá.
+const detalharContexto = async (
+  $: EngineInterface,
+  modo: 'summary' | 'full',
+): Promise<boolean> => {
+  const uso = await $.session.usage({ breakdown: modo })
+  const medido = uso.context.breakdown
+
+  if (medido === undefined) {
+    return false
+  }
+
+  const n = await read($, turno)
+  const detalhe: CockpitDetalhe = {
+    categorias: medido.categories.map(
+      (categoria): CockpitCategoria => ({
+        nome: categoria.name,
+        tokens: categoria.tokens,
+        tipo: categoria.kind,
+      }),
+    ),
+    total: medido.totalTokens,
+    janela: medido.rawMaxTokens,
+    modelo: medido.model,
+    turno: n,
+    isExato: modo === 'full',
+  }
+  await update($, contexto, atual => {
+    // Uma contagem exata deste turno não é trocada por uma estimativa.
+    const temExataDoTurno = atual.detalhe?.isExato === true && atual.detalhe.turno === n
+
+    return modo === 'summary' && temExataDoTurno ? atual : { ...atual, detalhe }
+  })
+
+  return true
 }
 
 const acertarAgentes = async ($: EngineInterface) => {
@@ -289,35 +334,13 @@ const acoes = ($: EngineInterface): Acoes => ({
   filtro: texto => void update($, ui, atual => ({ ...atual, filtro: texto })),
   // A única contagem de tokens extra do mod, e só quando o botão é apertado.
   detalhar: () =>
-    void anotar($, 'detalhamento', async () => {
+    void anotar($, 'contagem exata', async () => {
       await update($, ui, atual => ({ ...atual, isCalculando: true }))
 
       try {
-        const uso = await $.session.usage({ breakdown: 'full' })
-        const detalhe = uso.context.breakdown
-
-        if (detalhe === undefined) {
+        if (!(await detalharContexto($, 'full'))) {
           $.ui.toast('cs-cockpit: a sessão não devolveu o detalhamento do contexto')
-
-          return
         }
-
-        const categorias = detalhe.categories.map(
-          (categoria): CockpitCategoria => ({
-            nome: categoria.name,
-            tokens: categoria.tokens,
-            tipo: categoria.kind,
-          }),
-        )
-        await update($, contexto, atual => ({
-          ...atual,
-          detalhe: {
-            categorias,
-            total: detalhe.totalTokens,
-            janela: detalhe.rawMaxTokens,
-            modelo: detalhe.model,
-          },
-        }))
       } finally {
         await update($, ui, atual => ({ ...atual, isCalculando: false }))
       }
@@ -349,6 +372,7 @@ export const register: Register = on => {
     )
     await anotar($, 'agentes da sessão', () => acertarAgentes($))
     await anotar($, 'medição inicial', () => medir($))
+    await anotar($, 'estimativa inicial', () => detalharContexto($, 'summary'))
     await anotar($, 'status', () => publicarStatus($))
 
     // Um tique por segundo, só enquanto a aba em vista mostra tempo decorrido.
@@ -498,6 +522,8 @@ export const register: Register = on => {
       await gravarMedida($, e.context, e.rateLimits, e.cost)
       await publicarStatus($)
     })
+    // A cada medição, o detalhamento estimado acompanha (sem requisição).
+    await anotar($, 'estimativa do detalhamento', () => detalharContexto($, 'summary'))
 
     return medido
   })

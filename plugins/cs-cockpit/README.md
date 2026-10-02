@@ -65,8 +65,10 @@ sobre um arquivo que já existia, o conteúdo antigo é lido antes da escrita, p
 
 **3 Contexto.** Percentual usado, tokens sobre a janela, gráfico dos últimos 12 turnos e quanto o
 último turno acrescentou. Custo da sessão e do último turno, e o limite de uso com o horário de
-renovação. O botão "Calcular detalhamento" pede a separação por categoria só quando é apertado,
-porque ela faz uma contagem de tokens extra.
+renovação. Abaixo, o detalhamento por categoria (sistema, ferramentas, memória, conversa): uma
+estimativa local, atualizada a cada turno, sem requisição extra. O botão "Contagem exata" troca a
+estimativa pela contagem de verdade, que faz uma requisição por ferramenta e por arquivo de
+memória; por isso só acontece quando é apertado.
 
 **4 Arquivos.** Arquivos lidos (caminho, quantas vezes e por quem) e comandos Bash (status, exit
 code e duração), com um campo de filtro.

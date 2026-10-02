@@ -1,6 +1,6 @@
 {
   "name": "cs-cockpit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Painel ao lado da conversa com agentes, diffs, contexto, arquivos e comandos, e uma status line. Só observa.",
   "author": {
     "name": "Cesar Schutz",
