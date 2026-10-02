@@ -10,8 +10,6 @@ veio.
 
 <img src="../../docs/csr-cockpit/agentes-rodando.png" width="720" alt="Aba Agentes com dois subagentes rodando: modelo, tempo, contexto, custo e a chamada em curso de cada um">
 
-<img src="../../docs/csr-cockpit/linha-de-resumo.png" width="860" alt="Linha de resumo acima do prompt: contexto, tokens, custo, limite de uso e agentes">
-
 As imagens desta página vêm de uma sessão real no terminal (Claude Code 2.1.287, modelo Haiku
 4.5), num projeto de exemplo.
 
@@ -53,9 +51,7 @@ abas.
 
 Fica acima do prompt o tempo todo, com o painel aberto ou fechado:
 
-```
- CSR  Cockpit  contexto 22% · 44,8k tokens (+1,1k) · US$ 0,15 (+0,02) · limite 5h 17%, 7d 64% · agentes 2 concluídos
-```
+<img src="../../docs/csr-cockpit/linha-de-resumo.png" width="860" alt="Linha de resumo acima do prompt: contexto, tokens, custo, limite de uso e agentes">
 
 | Parte | O que diz |
 |---|---|
