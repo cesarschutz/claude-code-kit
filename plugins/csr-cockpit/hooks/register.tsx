@@ -12,6 +12,7 @@ import type {
   SessionRateLimit,
   ToolCallInput,
   ToolCallResult,
+  TurnUsage,
 } from 'claude-code'
 
 import type {
@@ -31,6 +32,7 @@ import {
   CONTEXTO_INICIAL,
   FICHAS_DE_COMANDO,
   FICHAS_DE_TURNO,
+  GASTOS_INICIAIS,
   UI_INICIAL,
   comAgente,
   comAtividade,
@@ -41,6 +43,8 @@ import {
   comFimDoAgente,
   comFimDoComando,
   comFimDoPasso,
+  comGasto,
+  comGastos,
   comInicioDoTurno,
   comLeitura,
   comListaDaSessao,
@@ -72,6 +76,8 @@ const rodadas = atom({ plugin: 'csr-cockpit', key: 'rodadas' } as const, [])
 const serie = atom({ plugin: 'csr-cockpit', key: 'serie' } as const, 0)
 // Quantos pedidos a pessoa fez: o número que as abas mostram como "Turno N".
 const pedidos = atom({ plugin: 'csr-cockpit', key: 'pedidos' } as const, 0)
+// O custo da sessão repartido pelos subagentes, resposta a resposta.
+const gastos = atom({ plugin: 'csr-cockpit', key: 'gastos' } as const, GASTOS_INICIAIS)
 
 // Os detalhes abertos sob demanda, um membro por item: assim as listas que
 // mudam a cada chamada continuam pequenas.
@@ -118,6 +124,31 @@ const gravarMedida = async (
 const medir = async ($: EngineInterface) => {
   const uso = await $.session.usage()
   await gravarMedida($, uso.context, uso.rateLimits, uso.cost)
+}
+
+// De onde a repartição do custo parte: numa sessão retomada, o que já foi
+// gasto antes não é de nenhum agente desta vez.
+const partirDoCusto = async ($: EngineInterface) => {
+  const usd = (await $.session.usage()).cost?.usd
+  await update($, gastos, atual => comGasto(atual, usd, undefined, undefined))
+}
+
+// Ao fim de uma resposta do modelo: o que o custo da sessão subiu vai para o
+// subagente que a fez, com o tamanho do contexto dele nessa resposta.
+const somarGasto = async (
+  $: EngineInterface,
+  agenteId: string | undefined,
+  uso: TurnUsage | null,
+) => {
+  const usd = (await $.session.usage()).cost?.usd
+  const tamanho =
+    uso === null
+      ? undefined
+      : uso.input_tokens +
+        uso.cache_read_input_tokens +
+        uso.cache_creation_input_tokens +
+        uso.output_tokens
+  await update($, gastos, atual => comGasto(atual, usd, agenteId, tamanho))
 }
 
 // O detalhamento do contexto por categoria. 'summary' estima localmente, sem
@@ -454,7 +485,7 @@ const lerDados = async ($: EngineInterface): Promise<Dados> => {
   const foco = visao.foco
   const dados: Dados = {
     ui: visao,
-    agentes: await read($, agentes),
+    agentes: comGastos(await read($, agentes), await read($, gastos)),
     turnos: await read($, turnos),
     contexto: await read($, contexto),
     arquivos: await read($, arquivos),
@@ -515,6 +546,7 @@ export const register: Register = on => {
     )
     await anotar($, 'agentes da sessão', () => acertarAgentes($))
     await anotar($, 'medição inicial', () => medir($))
+    await anotar($, 'custo inicial', () => partirDoCusto($))
     await anotar($, 'estimativa inicial', () => detalharContexto($, 'summary'))
 
     // Um tique por segundo, só enquanto a aba em vista mostra tempo decorrido.
@@ -660,10 +692,24 @@ export const register: Register = on => {
         )
       }
       await anotar($, 'medição do início do turno', () => medir($))
-      await update($, contexto, comInicioDoTurno)
+
+      // O ponto de partida do "último turno" é o pedido da pessoa: o retorno de
+      // um agente soma no mesmo turno.
+      if (retorno === undefined) {
+        await update($, contexto, comInicioDoTurno)
+      }
     })
 
     return iniciado
+  })
+
+  // Cada resposta do modelo, do loop principal e dos subagentes: passa inteira,
+  // e só depois dela vem a conta de quem gastou.
+  on('turn.step', async function* ($, e, next) {
+    const resposta = yield* next(e)
+    await anotar($, 'turn.step', () => somarGasto($, e.agentId, resposta.usage))
+
+    return resposta
   })
 
   on('turn.complete', async ($, e, next) => {

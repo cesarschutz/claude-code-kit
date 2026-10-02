@@ -36,17 +36,9 @@ linha acima do prompt resume contexto, custo, limite de uso e agentes. Clicar no
 de um comando ou de um turno abre o detalhe: o pedido, as chamadas e a resposta. O mod só observa:
 não bloqueia nem altera nenhuma chamada de ferramenta.
 
-```
- CSR  Cockpit
-1 Agentes   2 Diffs   3 Contexto   4 Arquivos   5 Turnos
+<img src="docs/csr-cockpit/agentes-rodando.png" width="720" alt="Aba Agentes do csr-cockpit com dois subagentes rodando">
 
-67% do contexto   134,4k / 200k
-████████████████████████████░░░░░░░░░░░░░░
-Últimos 12 turnos
-▂▃▃▄▅▅▆  ▲ +18,2k no último turno
-Custo da sessão US$ 1,84   Último turno US$ 0,21
-Limite de uso (5 h) 38% · renova em 2h10
-```
+<img src="docs/csr-cockpit/linha-de-resumo.png" width="860" alt="Linha de resumo do csr-cockpit acima do prompt">
 
 ```bash
 claude plugin install csr-cockpit@cesarschutz

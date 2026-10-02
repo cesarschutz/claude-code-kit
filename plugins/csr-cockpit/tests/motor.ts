@@ -9,6 +9,7 @@ import type {
   SessionUsage,
   SessionUsageArgs,
   ToolCallResult,
+  TurnUsage,
 } from 'claude-code'
 import { mock } from 'claude-code/testing'
 import type { MockClock } from 'claude-code/testing'
@@ -32,6 +33,8 @@ export type Motor = {
   relogio: MockClock
   visto: Visto
   uso: SessionUsage
+  // O que a próxima resposta do modelo (turn.step) diz ter consumido.
+  passo: TurnUsage | null
   arquivos: Record<string, string>
   agentes: AgentInfo[]
   // A transcrição que $.session.messages devolve para um subagente.
@@ -77,6 +80,7 @@ export const ligar = (on: On): Motor => {
     relogio,
     visto: { status: [], usos: [], ordem: [], abertos: [], fechados: [], chamadas: [] },
     uso: usoInicial(),
+    passo: null,
     arquivos: {},
     agentes: [],
     mensagens: [],
@@ -164,6 +168,18 @@ export const ligar = (on: On): Motor => {
     agentId: `ag-${e.tool_use_id}`,
   }))
   on('turn.start', (_, e) => ({ turnId: e.turnId }))
+  // Uma resposta do modelo, sem pedaços: só o resultado, com o consumo.
+  // eslint-disable-next-line require-yield
+  on('turn.step', async function* (_, e) {
+    return {
+      turnId: e.turnId,
+      index: e.index,
+      answer: '',
+      toolUses: [],
+      stopReason: 'end_turn' as const,
+      usage: motor.passo,
+    }
+  })
   on('turn.complete', (_, e) => ({ text: e.answer }))
   on('session.measure', (_, e) => ({ changed: e.changed }))
   // O que o motor desenharia na faixa acima do prompt: nada.

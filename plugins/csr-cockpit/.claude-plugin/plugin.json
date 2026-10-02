@@ -1,6 +1,6 @@
 {
   "name": "csr-cockpit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Painel ao lado da conversa com agentes, diffs, contexto, arquivos, comandos e turnos, e uma linha de resumo acima do prompt. Só observa.",
   "author": {
     "name": "Cesar Schutz",

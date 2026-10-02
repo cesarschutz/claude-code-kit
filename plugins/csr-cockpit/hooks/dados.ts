@@ -10,6 +10,7 @@ import type {
   CockpitContexto,
   CockpitEdicao,
   CockpitFichaDoAgente,
+  CockpitGastos,
   CockpitLimite,
   CockpitPasso,
   CockpitPonto,
@@ -19,12 +20,15 @@ import type {
 } from '../types'
 import {
   curto,
+  decimal,
   dolar,
   modeloCurto,
   nomeCurtoDoLimite,
   plural,
   primeiraLinha,
   relativo,
+  semRaiz,
+  tokens,
   umaLinha,
 } from './formato'
 
@@ -70,7 +74,7 @@ export const resumoDaChamada = (campos: Readonly<Record<string, unknown>>, raiz:
     const valor = campos[nome]
 
     if (typeof valor === 'string' && valor !== '') {
-      const texto = nome.endsWith('_path') ? relativo(valor, raiz) : valor
+      const texto = nome.endsWith('_path') ? relativo(valor, raiz) : semRaiz(valor, raiz)
 
       return curto(umaLinha(texto), 80)
     }
@@ -358,6 +362,29 @@ export const custoDoUltimoTurno = (contexto: CockpitContexto): number | undefine
     ? undefined
     : Math.max(0, contexto.custo - contexto.custoAntes)
 
+// O que o último pedido somou ao contexto, do início dele até agora.
+export const variacaoDoUltimoTurno = (contexto: CockpitContexto): number | undefined =>
+  contexto.tokens === undefined || contexto.tokensAntes === undefined
+    ? undefined
+    : contexto.tokens - contexto.tokensAntes
+
+// Entre parênteses, ao lado do total: o que o último turno somou. Sem mudança, nada.
+const somado = (texto: string | undefined): string => (texto === undefined ? '' : ` (${texto})`)
+
+const tokensSomados = (contexto: CockpitContexto): string | undefined => {
+  const delta = variacaoDoUltimoTurno(contexto)
+
+  return delta === undefined || Math.round(delta) === 0
+    ? undefined
+    : `${delta > 0 ? '+' : '−'}${tokens(delta)}`
+}
+
+const custoSomado = (contexto: CockpitContexto): string | undefined => {
+  const delta = custoDoUltimoTurno(contexto)
+
+  return delta === undefined || delta < 0.005 ? undefined : `+${decimal(delta, 2)}`
+}
+
 // A linha de resumo: só o que já tem leitura, cada parte com o seu nome. Sem
 // nada para dizer (sessão recém-aberta), não há linha.
 export const textoDoStatus = (
@@ -371,8 +398,12 @@ export const textoDoStatus = (
   if (contexto.percentual !== undefined) {
     partes.push(`contexto ${contexto.percentual}%`)
 
+    if (contexto.tokens !== undefined) {
+      partes.push(`${tokens(contexto.tokens)} tokens${somado(tokensSomados(contexto))}`)
+    }
+
     if (contexto.custo !== undefined) {
-      partes.push(dolar(contexto.custo))
+      partes.push(`${dolar(contexto.custo)}${somado(custoSomado(contexto))}`)
     }
   }
 
@@ -393,6 +424,62 @@ export const textoDoStatus = (
 
   return partes.length === 0 ? undefined : partes.join(' · ')
 }
+
+export const GASTOS_INICIAIS: CockpitGastos = { visto: 0, agentes: {} }
+
+const MAX_GASTOS = 150
+
+// O motor só dá o custo da sessão inteira. Ao fim de cada resposta do modelo,
+// o que esse custo subiu desde a última leitura vai para quem fez a resposta:
+// um subagente (`agenteId`) ou o loop principal (ninguém). `contexto` é o
+// tamanho do contexto do agente nessa resposta.
+export const comGasto = (
+  atual: CockpitGastos,
+  usd: number | undefined,
+  agenteId: string | undefined,
+  contexto: number | undefined,
+): CockpitGastos => {
+  const subiu = usd === undefined ? 0 : Math.max(0, usd - atual.visto)
+  const visto = usd === undefined ? atual.visto : Math.max(atual.visto, usd)
+
+  if (agenteId === undefined) {
+    return { ...atual, visto }
+  }
+
+  const antes = atual.agentes[agenteId]
+  const tamanho = contexto ?? antes?.contexto
+  const agentes = {
+    ...atual.agentes,
+    [agenteId]: {
+      usd: (antes?.usd ?? 0) + subiu,
+      ...(tamanho === undefined ? {} : { contexto: tamanho }),
+    },
+  }
+  const sobra = Object.keys(agentes).length - MAX_GASTOS
+
+  return {
+    visto,
+    agentes:
+      sobra > 0 ? Object.fromEntries(Object.entries(agentes).slice(sobra)) : agentes,
+  }
+}
+
+// A lista de agentes com o custo e o contexto de cada um, para as telas.
+export const comGastos = (
+  lista: readonly CockpitAgente[],
+  gastos: CockpitGastos,
+): CockpitAgente[] =>
+  lista.map(agente => {
+    const gasto = gastos.agentes[agente.id]
+
+    return gasto === undefined
+      ? agente
+      : {
+          ...agente,
+          custo: gasto.usd,
+          ...(gasto.contexto === undefined ? {} : { contexto: gasto.contexto }),
+        }
+  })
 
 export const comRodada = (
   lista: readonly CockpitRodada[],
@@ -455,11 +542,19 @@ export const gruposDeTurnos = (rodadas: readonly CockpitRodada[]): Grupo[] => {
 
   return [...grupos.entries()]
     .map(([ordem, membros]): Grupo => {
+      const lidos = (ler: (rodada: CockpitRodada) => number | undefined): number[] =>
+        [...membros]
+          .sort((a, b) => a.n - b.n)
+          .map(ler)
+          .filter((valor): valor is number => valor !== undefined)
       const somar = (ler: (rodada: CockpitRodada) => number | undefined): number | undefined => {
-        const valores = membros.map(ler).filter((valor): valor is number => valor !== undefined)
+        const valores = lidos(ler)
 
         return valores.length === 0 ? undefined : valores.reduce((a, b) => a + b, 0)
       }
+      // Contexto e custo já vêm contados desde o começo do pedido: vale a última leitura.
+      const ultimo = (ler: (rodada: CockpitRodada) => number | undefined): number | undefined =>
+        lidos(ler).at(-1)
       const porFerramenta: Record<string, number> = {}
 
       for (const rodada of membros) {
@@ -476,8 +571,8 @@ export const gruposDeTurnos = (rodadas: readonly CockpitRodada[]): Grupo[] => {
         isAndando: membros.some(rodada => rodada.duracaoMs === undefined),
         isAbortado: membros.some(rodada => rodada.isAbortado === true),
         duracaoMs: somar(rodada => rodada.duracaoMs) ?? 0,
-        variacao: somar(rodada => rodada.variacao),
-        custo: somar(rodada => rodada.custo),
+        variacao: ultimo(rodada => rodada.variacao),
+        custo: ultimo(rodada => rodada.custo),
         ferramentas: somar(rodada => rodada.ferramentas) ?? 0,
         falhas: somar(rodada => rodada.falhas) ?? 0,
         porFerramenta,

@@ -60,7 +60,7 @@ test('linha de resumo: em azul na faixa acima do prompt, cada parte com o seu no
     expect(selo?.props.color).toBe('suggestion')
     expect(selo?.props.inverse).toBe(true)
     await mostra(ui, /^ Cockpit$/)
-    expect(await resumoDe(ui)).toBe('contexto 67% · US$ 1,84')
+    expect(await resumoDe(ui)).toBe('contexto 67% · 134,4k tokens · US$ 1,84')
     expect(await corDe(ui, /^ +contexto /)).toBe('suggestion')
     await ui.unmount()
   }
@@ -68,10 +68,12 @@ test('linha de resumo: em azul na faixa acima do prompt, cada parte com o seu no
   const ui = await $.ui.mount({ ...FAIXA, surface: 'desktop', props: faixa() })
   const explore = await $.agent.spawn(subagente('t1', 'Explore', 'procurar hooks'))
   await $.agent.spawn(subagente('t2', 'Plan', 'planejar'))
-  expect(await resumoDe(ui)).toBe('contexto 67% · US$ 1,84 · agentes 2 rodando')
+  expect(await resumoDe(ui)).toBe('contexto 67% · 134,4k tokens · US$ 1,84 · agentes 2 rodando')
 
   await $.turn.complete(fimDoTurno('s1', 'Pronto.', 4000, explore.agentId))
-  expect(await resumoDe(ui)).toBe('contexto 67% · US$ 1,84 · agentes 1 rodando, 1 concluído')
+  expect(await resumoDe(ui)).toBe(
+    'contexto 67% · 134,4k tokens · US$ 1,84 · agentes 1 rodando, 1 concluído',
+  )
 
   await $.session.measure({
     context: { tokens: 152_600, window: 200_000, percent: 76 },
@@ -83,7 +85,17 @@ test('linha de resumo: em azul na faixa acima do prompt, cada parte com o seu no
     changed: ['context', 'cost', 'rateLimits'],
   })
   expect(await resumoDe(ui)).toBe(
-    'contexto 76% · US$ 2,05 · limite 5h 38%, 7d 60% · agentes 1 rodando, 1 concluído',
+    'contexto 76% · 152,6k tokens · US$ 2,05 · limite 5h 38%, 7d 60% · agentes 1 rodando, 1 concluído',
+  )
+
+  // Com um turno em curso: entre parênteses, o que ele somou até agora.
+  motor.uso = uso(152_600, 76, 2.05)
+  await $.turn.start({ text: 'mais um pedido', turnId: 't1' })
+  expect(await resumoDe(ui)).toMatch(/^contexto 76% · 152,6k tokens · US\$ 2,05 · /)
+  motor.uso = uso(170_800, 85, 2.26)
+  await $.session.measure({ ...motor.uso, changed: ['context', 'cost'] })
+  expect(await resumoDe(ui)).toMatch(
+    /^contexto 85% · 170,8k tokens \(\+18,2k\) · US\$ 2,26 \(\+0,21\) · /,
   )
   await ui.unmount()
 
@@ -327,6 +339,7 @@ test('aba 4, Arquivos e comandos: leituras por autor, status do Bash e filtro', 
   await $.tool.call(doAgente({ tool: 'Read', file_path: '/proj/docs/b.md' }, explore.agentId))
   await $.tool.call({ tool: 'Read', file_path: '/proj/segredo' })
   await $.tool.call({ tool: 'Bash', command: 'npm run check' })
+  await $.tool.call({ tool: 'Bash', command: 'ls -la /proj/src /proj' })
   await $.tool.call({ tool: 'Bash', command: 'npm test' })
   const pendente = $.tool.call({ tool: 'Bash', command: 'sleep 60' })
   await motor.relogio.advance(5000)
@@ -339,13 +352,19 @@ test('aba 4, Arquivos e comandos: leituras por autor, status do Bash e filtro', 
     await mostra(ui, / {2}1× docs\/b\.md · Explore/)
     await naoMostra(ui, 'segredo')
 
-    await mostra(ui, 'Comandos Bash (3)')
+    await mostra(ui, 'Comandos Bash (4)')
     // O comando é o botão que abre o detalhe.
     const comandos = async () =>
       (await ui.findAll({ type: 'Button' }))
         .filter(botao => String(botao.key).startsWith('ver-comando-'))
         .map(botao => botao.props.label)
-    expect(await comandos()).toEqual(['▸ sleep 60', '▸ npm test', '▸ npm run check'])
+    // A pasta do projeto some do comando mostrado: /proj/src vira src, /proj vira um ponto.
+    expect(await comandos()).toEqual([
+      '▸ sleep 60',
+      '▸ npm test',
+      '▸ ls -la src .',
+      '▸ npm run check',
+    ])
     await mostra(ui, /^ \d+,\ds$/)
     await mostra(ui, /^ exit 1 · \d+,\ds$/)
     await mostra(ui, /^ rodando · 5,0s$/)
@@ -370,7 +389,7 @@ test('aba 4, Arquivos e comandos: leituras por autor, status do Bash e filtro', 
   const ui = await $.ui.mount({ ...PAINEL, surface: 'desktop', props: painel('dock', 100) })
   await ui.press({ key: 'aba-4' })
   // Solto o comando, ele termina: não há mais nenhum rodando.
-  await mostra(ui, 'Comandos Bash (3)')
+  await mostra(ui, 'Comandos Bash (4)')
   expect(await ui.find({ type: 'Text', text: /^●$/ })).toBeUndefined()
   await ui.unmount()
 })
@@ -429,6 +448,11 @@ test('turnos agrupados: o retorno de um agente em segundo plano entra no turno d
   const dois = await $.agent.spawn(subagente('a2', 'Plan', 'previsão de Tóquio'))
   await $.tool.call({ tool: 'Read', file_path: '/proj/a.ts' })
   await $.turn.complete(fimDoTurno('t1', 'Agentes lançados.', 4000))
+  const medir = async (tokens: number, usd: number) => {
+    motor.uso = uso(tokens, 40, usd)
+    await $.session.measure({ ...motor.uso, changed: ['context', 'cost'] })
+  }
+  await medir(82_000, 1.3)
 
   // O Claude Code abre um turno sozinho a cada agente que volta.
   await $.turn.start({
@@ -437,11 +461,13 @@ test('turnos agrupados: o retorno de um agente em segundo plano entra no turno d
   })
   await $.tool.call({ tool: 'Edit', file_path: '/proj/a.ts', old_string: 'a', new_string: 'b' })
   await $.turn.complete(fimDoTurno('t2', 'Lisboa pronta.', 3000))
+  await medir(83_000, 1.45)
   await $.turn.start({
     text: `<agent-message from="${String(dois.agentId)}"> [Subagent hand-back] Tóquio: chuva</agent-message>`,
     turnId: 't3',
   })
   await $.turn.complete(fimDoTurno('t3', 'As duas previsões estão prontas.', 2000))
+  await medir(84_000, 1.5)
 
   await $.turn.start({ text: 'obrigado', turnId: 't4' })
   await $.turn.complete(fimDoTurno('t4', 'De nada.', 1000))
@@ -455,7 +481,11 @@ test('turnos agrupados: o retorno de um agente em segundo plano entra no turno d
     await mostra(ui, 'obrigado')
     await mostra(ui, 'rode 2 agentes')
     await mostra(ui, /^9,0s$/)
-    await mostra(ui, '2 ferramentas · 1 edição · 2 retornos de agentes')
+    // Contexto e custo contam do pedido até o último retorno, sem somar em dobro.
+    await mostra(
+      ui,
+      '+4k de contexto · US$ 0,30 · 2 ferramentas · 1 edição · 2 retornos de agentes',
+    )
     expect(await ui.find({ key: 'ver-turno-3' })).toBeUndefined()
 
     await ui.press({ key: 'ver-turno-1' })
@@ -538,6 +568,61 @@ test('detalhe de um agente: pedido, chamadas, mensagens, tokens e resultado', as
   await ui.press({ key: 'aba-2' })
   await ui.press({ key: 'aba-1' })
   await mostra(ui, 'Concluídos (1)')
+  await ui.unmount()
+})
+
+test('custo e contexto por agente: o que o custo da sessão sobe a cada resposta vai para quem a fez', async ($, on) => {
+  const motor = ligar(on)
+  // Sessão retomada: o US$ 1,00 de antes não é de nenhum agente.
+  motor.uso = uso(100_000, 50, 1)
+  await $.session.start(INICIO)
+  const explore = await $.agent.spawn(subagente('t1', 'Explore', 'procurar hooks'))
+  const plan = await $.agent.spawn(subagente('t2', 'Plan', 'planejar'))
+  const consumo = (lidos: number) => ({
+    input_tokens: 1000,
+    output_tokens: 500,
+    cache_read_input_tokens: lidos,
+    cache_creation_input_tokens: 1500,
+    model: 'claude-haiku-4-5-20251001',
+  })
+  // Uma resposta do modelo, depois da qual a sessão custa `usd`.
+  const responder = async (usd: number, lidos: number, agentId?: string) => {
+    motor.uso = uso(100_000, 50, usd)
+    motor.passo = consumo(lidos)
+    const fluxo = $.turn.step({
+      turnId: 's1',
+      index: 0,
+      model: 'claude-haiku-4-5-20251001',
+      messageCount: 3,
+      ...(agentId === undefined ? {} : { agentId }),
+    })
+
+    // Lê o fluxo até o fim: o que ele devolve é o resultado da resposta.
+    let pedaco = await fluxo.next()
+
+    while (pedaco.done !== true) {
+      pedaco = await fluxo.next()
+    }
+
+    return pedaco.value
+  }
+
+  // O resultado de cada resposta passa intacto.
+  expect((await responder(1.1, 30_000))?.usage).toEqual(consumo(30_000))
+  await responder(1.12, 18_000, explore.agentId)
+  await responder(1.17, 18_000, plan.agentId)
+  await responder(1.18, 20_000, explore.agentId)
+  await $.session.measure({ ...motor.uso, changed: ['cost'] })
+
+  const ui = await $.ui.mount({ ...PAINEL, surface: 'desktop', props: painel('dock', 100) })
+  await mostra(ui, /^ haiku-4-5 · 0,0s · contexto 23k · US\$ 0,03$/)
+  await mostra(ui, /^ haiku-4-5 · 0,0s · contexto 21k · US\$ 0,05$/)
+  await ui.press({ key: `ver-agente-${String(explore.agentId)}` })
+  await mostra(ui, 'Contexto do agente 23k · custo US$ 0,03')
+  // O total em dinheiro, no alto da aba Turnos.
+  await ui.press({ key: 'aba-5' })
+  await mostra(ui, ' · US$ 1,18 na sessão')
+  await ui.press({ key: 'aba-1' })
   await ui.unmount()
 })
 

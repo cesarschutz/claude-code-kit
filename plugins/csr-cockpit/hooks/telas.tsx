@@ -30,7 +30,7 @@ import type {
   CockpitTurno,
   CockpitUi,
 } from '../types'
-import { custoDoUltimoTurno, gruposDeTurnos } from './dados'
+import { custoDoUltimoTurno, gruposDeTurnos, variacaoDoUltimoTurno } from './dados'
 import type { Grupo } from './dados'
 import { fichaDoAgente, fichaDoComando, fichaDoTurno } from './fichas'
 import {
@@ -44,6 +44,7 @@ import {
   plural,
   relativo,
   renovaEm,
+  semRaiz,
   tokens,
   umaLinha,
 } from './formato'
@@ -250,10 +251,15 @@ const linhaDoAgente = (
     : agente.duracaoMs === undefined
       ? 'duração n/d'
       : duracao(agente.duracaoMs)
-  const detalhe = isRodando ? atividade(agente) : (agente.resultado ?? 'sem texto de resultado')
+  const detalhe = semRaiz(
+    isRodando ? atividade(agente) : (agente.resultado ?? 'sem texto de resultado'),
+    quadro.raiz,
+  )
   const numeros = [
     agente.modelo ?? 'modelo n/d',
     tempo,
+    agente.contexto === undefined ? undefined : `contexto ${tokens(agente.contexto)}`,
+    agente.custo === undefined ? undefined : dolar(agente.custo),
     agente.chamadas > 0 ? plural(agente.chamadas, 'chamada', 'chamadas') : undefined,
     agente.tokens === undefined ? undefined : `${tokens(agente.tokens)} tokens`,
   ].filter((parte): parte is string => parte !== undefined)
@@ -439,13 +445,11 @@ const variacao = (contexto: CockpitContexto): string => {
     return 'nenhum turno medido'
   }
 
-  const base = contexto.historico.at(-2)?.tokens ?? contexto.tokensAntes
+  const delta = variacaoDoUltimoTurno(contexto)
 
-  if (base === undefined) {
+  if (delta === undefined) {
     return 'primeiro turno medido'
   }
-
-  const delta = ultimo.tokens - base
 
   return `${delta >= 0 ? '▲ +' : '▼ −'}${tokens(delta)} no último turno`
 }
@@ -651,7 +655,10 @@ const linhaDoComando = (
     comando.quem === 'principal' ? undefined : comando.quem,
   ].filter((parte): parte is string => parte !== undefined)
 
-  const texto = curto(umaLinha(comando.comando), Math.max(20, quadro.largura - 34))
+  const texto = curto(
+    umaLinha(semRaiz(comando.comando, quadro.raiz)),
+    Math.max(20, quadro.largura - 34),
+  )
 
   if (quadro.isCompacto) {
     return (
@@ -789,7 +796,12 @@ const abaTurnos = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): R
   return (
     <Box key="turnos" flexDirection="column" rowGap={respiro(quadro)}>
       <Box flexDirection="column">
-        <Text bold>{`Turnos (${grupos.length})`}</Text>
+        <Text>
+          <Text bold>{`Turnos (${grupos.length})`}</Text>
+          {dados.contexto.custo !== undefined && (
+            <Text dimColor>{` · ${dolar(dados.contexto.custo)} na sessão`}</Text>
+          )}
+        </Text>
         {grupos.length === 0 && <Text dimColor>Nenhum turno nesta sessão ainda.</Text>}
       </Box>
       {grupos

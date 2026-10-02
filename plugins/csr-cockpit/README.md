@@ -5,31 +5,15 @@ estão fazendo, o que foi editado, quanto do contexto já foi usado e quais arqu
 passaram por ali. Mais uma linha de resumo acima do prompt.
 
 O csr-cockpit só observa. Nenhum dos seus hooks bloqueia, altera ou segura uma chamada de
-ferramenta: todos repassam a chamada e devolvem o resultado como veio.
+ferramenta nem uma resposta do modelo: todos repassam o que receberam e devolvem o resultado como
+veio.
 
-```
- CSR  Cockpit
-1 Agentes   2 Diffs   3 Contexto   4 Arquivos   5 Turnos
-────────────────────────────────────────────────────────
+<img src="../../docs/csr-cockpit/agentes-rodando.png" width="720" alt="Aba Agentes com dois subagentes rodando: modelo, tempo, contexto, custo e a chamada em curso de cada um">
 
-67% do contexto   134,4k / 200k
-████████████████████████████░░░░░░░░░░░░░░
+<img src="../../docs/csr-cockpit/linha-de-resumo.png" width="860" alt="Linha de resumo acima do prompt: contexto, tokens, custo, limite de uso e agentes">
 
-Últimos 12 turnos
-▂▃▃▄▅▅▆  ▲ +18,2k no último turno
-
-Custo
-Sessão        US$ 1,84
-Último turno  US$ 0,21
-
-Limite de uso
-5 h      38%  █████████░░░░░░░░░░░░░░░  renova em 2h10
-7 dias   60%  ██████████████░░░░░░░░░░  renova em 2d
-```
-
-```
- CSR  contexto 67% · US$ 1,84 · limite 5h 38%, 7d 60% · agentes 2 rodando, 3 concluídos
-```
+As imagens desta página vêm de uma sessão real no terminal (Claude Code 2.1.287, modelo Haiku
+4.5), num projeto de exemplo.
 
 ## Requisitos
 
@@ -65,29 +49,71 @@ Os dados são registrados desde o início da sessão, com o painel aberto ou fec
 não tiver lugar ao lado da conversa, aparece uma versão compacta acima do prompt, com as mesmas
 abas.
 
+## A linha de resumo
+
+Fica acima do prompt o tempo todo, com o painel aberto ou fechado:
+
+```
+ CSR  Cockpit  contexto 22% · 44,8k tokens (+1,1k) · US$ 0,15 (+0,02) · limite 5h 17%, 7d 64% · agentes 2 concluídos
+```
+
+| Parte | O que diz |
+|---|---|
+| `contexto 22%` | Quanto da janela de contexto está ocupado |
+| `44,8k tokens (+1,1k)` | Tokens no contexto agora e, entre parênteses, o que o último turno somou |
+| `US$ 0,15 (+0,02)` | Custo da sessão e, entre parênteses, o do último turno |
+| `limite 5h 17%, 7d 64%` | Uso de cada janela do limite da conta |
+| `agentes 2 concluídos` | Subagentes rodando e concluídos |
+
+O "último turno" conta do seu último pedido até agora, com os retornos de agentes em segundo
+plano incluídos. Os parênteses somem quando não houve mudança.
+
 ## As abas
 
-**1 Agentes.** Subagentes rodando e concluídos, com contagem. Para cada um: tipo, modelo, tempo
-decorrido, número de chamadas, a tarefa que recebeu e a atividade atual (última ferramenta e
-argumento). Nos concluídos, a duração e a primeira linha do resultado.
+### 1 Agentes
 
-**2 Diffs.** Cada Edit e Write do loop principal, agrupado por turno (os últimos 10). Um diff por
-vez, com número de linha, caminho do arquivo e contagem de linhas que entraram e saíram. No Write
-sobre um arquivo que já existia, o conteúdo antigo é lido antes da escrita, para o diff ser o real.
+Subagentes rodando e concluídos, com contagem. Para cada um: tipo, modelo, tempo decorrido, o
+tamanho do contexto do próprio agente, quanto ele custou, o número de chamadas, a tarefa que
+recebeu e a atividade atual (última ferramenta e argumento). Nos concluídos, a duração, o total de
+tokens e a primeira linha do resultado.
 
-**3 Contexto.** Percentual usado, tokens sobre a janela, gráfico dos últimos 12 turnos e quanto o
-último turno acrescentou. Custo da sessão e do último turno, e o limite de uso com o horário de
-renovação. Abaixo, o detalhamento por categoria (sistema, ferramentas, memória, conversa): uma
-estimativa local, atualizada a cada turno, sem requisição extra. O botão "Contagem exata" troca a
-estimativa pela contagem de verdade, que faz uma requisição por ferramenta e por arquivo de
-memória; por isso só acontece quando é apertado.
+<img src="../../docs/csr-cockpit/agentes.png" width="720" alt="Aba Agentes com dois subagentes concluídos, com contexto, custo, chamadas e tokens">
 
-**4 Arquivos.** Arquivos lidos (caminho, quantas vezes e por quem) e comandos Bash (status, exit
-code e duração), com um campo de filtro.
+### 2 Diffs
 
-**5 Turnos.** Um registro por turno da conversa, do mais recente ao mais antigo: o começo do
-pedido, a duração, quanto o turno somou ao contexto, quanto custou, quantas ferramentas foram
-chamadas, quantas falharam e quantas edições houve. O turno em curso aparece em andamento.
+Cada Edit e Write do loop principal, agrupado por turno (os últimos 10). Um diff por vez, com
+número de linha, caminho do arquivo e contagem de linhas que entraram e saíram. No Write sobre um
+arquivo que já existia, o conteúdo antigo é lido antes da escrita, para o diff ser o real.
+
+<img src="../../docs/csr-cockpit/diffs.png" width="720" alt="Aba Diffs com a edição de um arquivo: linhas que entraram em verde">
+
+### 3 Contexto
+
+Percentual usado, tokens sobre a janela, gráfico dos últimos 12 turnos e quanto o último turno
+acrescentou. Custo da sessão e do último turno, e o limite de uso com o horário de renovação.
+Abaixo, o detalhamento por categoria (sistema, ferramentas, memória, conversa): uma estimativa
+local, atualizada a cada turno, sem requisição extra. O botão "Contagem exata" troca a estimativa
+pela contagem de verdade, que faz uma requisição por ferramenta e por arquivo de memória; por isso
+só acontece quando é apertado.
+
+<img src="../../docs/csr-cockpit/contexto.png" width="720" alt="Aba Contexto: percentual usado, gráfico dos turnos, custo, limite de uso e detalhamento por categoria">
+
+### 4 Arquivos
+
+Arquivos lidos (caminho, quantas vezes e por quem) e comandos Bash (status, exit code, duração e
+quem rodou), com um campo de filtro. A pasta do projeto some dos comandos mostrados
+(`find /pasta/do/projeto/src` aparece como `find src`); o detalhe traz o comando inteiro.
+
+<img src="../../docs/csr-cockpit/arquivos.png" width="720" alt="Aba Arquivos: arquivos lidos por quem, e comandos Bash com sucesso em verde e falha em vermelho">
+
+### 5 Turnos
+
+Um registro por turno da conversa, do mais recente ao mais antigo: o começo do pedido, a duração,
+quanto o turno somou ao contexto, quanto custou, quantas ferramentas foram chamadas, quantas
+falharam e quantas edições houve. No alto, o custo total da sessão. O turno em curso aparece em
+andamento.
+
+<img src="../../docs/csr-cockpit/turnos.png" width="720" alt="Aba Turnos: três turnos com duração, contexto somado, custo, ferramentas e falhas">
 
 ## Detalhes
 
@@ -95,12 +121,14 @@ Nas abas Agentes, Arquivos e Turnos, o nome no começo de cada linha (`▸ Explo
 clicável e abre o detalhe do item no lugar da lista. Com o mouse sobre a linha, o nome fica
 sublinhado.
 
-- **Agente.** O pedido que ele recebeu, as últimas 40 chamadas de ferramenta com status e
-  duração, o que ele escreveu ao longo do trabalho (lido da transcrição dele ao abrir e no botão
-  "Reler mensagens"), a resposta final e os tokens de entrada e de saída.
+- **Agente.** O contexto e o custo dele, os tokens de entrada e de saída, o pedido que recebeu,
+  as últimas 40 chamadas de ferramenta com status e duração, o que ele escreveu ao longo do
+  trabalho (lido da transcrição dele ao abrir e no botão "Reler mensagens") e a resposta final.
 - **Comando.** O comando inteiro, a descrição, o fim da saída e o erro.
 - **Turno.** O pedido e a resposta inteiros, quantas vezes cada ferramenta foi chamada e, quando
   houve agentes em segundo plano, o que o Claude respondeu depois do retorno de cada um.
+
+<img src="../../docs/csr-cockpit/agente-detalhe.png" width="720" alt="Detalhe de um agente: contexto e custo, tokens, pedido, chamadas e resposta final">
 
 ### Turnos agrupados
 
@@ -108,6 +136,14 @@ Quando um agente em segundo plano termina, o Claude Code abre um turno sozinho p
 retorno. A aba Turnos junta esses turnos automáticos ao pedido que os gerou: um pedido seu é um
 turno na lista, com a duração, o custo e as ferramentas de tudo o que ele desencadeou. As edições
 feitas nesses retornos entram nos diffs do mesmo turno.
+
+### Custo e contexto de cada agente
+
+O Claude Code informa o custo da sessão inteira, não o de cada subagente. O csr-cockpit reparte
+esse custo: ao fim de cada resposta do modelo, o que o custo da sessão subiu vai para quem fez a
+resposta. A soma bate com o total da sessão; se duas respostas terminam no mesmo instante, uma
+fração pode cair no agente vizinho. O "contexto" de um agente é o tamanho do contexto dele na
+última resposta. Ele tem uma janela própria, que não ocupa a da conversa principal.
 
 ## Limites conhecidos
 
@@ -123,13 +159,15 @@ feitas nesses retornos entram nos diffs do mesmo turno.
   sempre em amarelo com um ícone de aviso.
 - **`/cockpit` não escreve nada na conversa.** O texto de saída de um comando entra no que o
   modelo lê; abrir e fechar o painel não devolvem texto.
-- **Custo por agente.** O Claude Code informa os tokens de cada subagente, não o valor em
-  dólar. O detalhe mostra os tokens.
+- **Custo por agente.** É uma repartição do custo da sessão, não um valor informado pelo Claude
+  Code (veja "Custo e contexto de cada agente"). Onde a sessão não tem custo, a linha mostra só o
+  contexto e os tokens.
+- **Primeiro turno.** Não mostra quanto somou ao contexto: antes da primeira resposta do modelo
+  ainda não há medida de onde partir.
 - **Mensagens do agente.** Não são ao vivo: são relidas ao abrir o detalhe e no botão. O
   raciocínio interno do agente não vem na transcrição; só o texto que ele escreveu.
-- **API em evolução.** A API de mods pode mudar entre versões do Claude Code. Este mod foi escrito
-  e testado na 2.1.283, ainda em acesso antecipado, no terminal. No app Desktop, o desenho do
-  painel ainda não foi conferido.
+- **API em evolução.** A API de mods pode mudar entre versões do Claude Code. Este mod foi
+  testado na 2.1.287, no terminal. No app Desktop, o desenho do painel ainda não foi conferido.
 
 ## Privacidade
 

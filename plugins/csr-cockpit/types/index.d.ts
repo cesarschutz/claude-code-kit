@@ -35,6 +35,23 @@ export type CockpitAgente = {
   resultado?: string
   // Total de tokens que o agente consumiu, quando o motor informa.
   tokens?: number
+  // Preenchidos na leitura, a partir de `gastos`: o custo atribuído ao agente
+  // e o tamanho do contexto dele na última resposta.
+  custo?: number
+  contexto?: number
+}
+
+// O que um subagente custou e o tamanho do contexto próprio dele.
+export type CockpitGasto = {
+  usd: number
+  contexto?: number
+}
+
+// `visto` é o custo da sessão na última leitura: o que ele sobe ao fim de cada
+// resposta do modelo vai para quem fez a resposta.
+export type CockpitGastos = {
+  visto: number
+  agentes: Record<string, CockpitGasto>
 }
 
 export type CockpitLinha = {
@@ -198,6 +215,7 @@ declare module 'claude-code' {
       rodadas: CockpitRodada[]
       serie: number
       pedidos: number
+      gastos: CockpitGastos
       fichasDeAgentes: StateFamily<CockpitFichaDoAgente>
       fichasDeComandos: StateFamily<CockpitFichaDoComando>
       fichasDeTurnos: StateFamily<CockpitFichaDoTurno>

@@ -99,6 +99,21 @@ export const fichaDoAgente = (
         </Text>
         {agente.descricao !== '' && <Text wrap="wrap">{agente.descricao}</Text>}
       </Box>
+      {(agente.contexto !== undefined || agente.custo !== undefined) && (
+        <Box flexDirection="column">
+          <Text bold>Contexto e custo</Text>
+          <Text wrap="wrap">
+            {[
+              agente.contexto === undefined
+                ? undefined
+                : `Contexto do agente ${tokens(agente.contexto)}`,
+              agente.custo === undefined ? undefined : `custo ${dolar(agente.custo)}`,
+            ]
+              .filter((parte): parte is string => parte !== undefined)
+              .join(' · ')}
+          </Text>
+        </Box>
+      )}
       {uso !== undefined && (
         <Box flexDirection="column">
           <Text bold>Tokens</Text>

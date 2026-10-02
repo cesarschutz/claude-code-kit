@@ -148,3 +148,8 @@ export const cauda = (texto: string, maximo: number): string =>
 
 export const cabeca = (texto: string, maximo: number): string =>
   texto.length > maximo ? `${texto.slice(0, maximo)}\n… mais ${texto.length - maximo} caracteres` : texto
+
+// Um comando ou padrão com a pasta do projeto encurtada: /proj/src vira src,
+// e /proj sozinho vira um ponto.
+export const semRaiz = (texto: string, raiz: string): string =>
+  raiz.length < 2 ? texto : texto.split(`${raiz}/`).join('').split(raiz).join('.')
