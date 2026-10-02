@@ -47,6 +47,12 @@ não bloqueia nem altera nenhuma chamada de ferramenta.
 
 <a href="plugins/csr-cockpit/"><img src="docs/arte/cockpit.svg" width="860" alt="A tela do Claude Code com o csr-cockpit: a conversa à esquerda, o painel com cinco abas à direita e a linha de resumo acima do prompt"></a>
 
+<a href="plugins/csr-cockpit/README.md#1-agentes"><img src="docs/arte/aba-1.svg" height="28" alt="1 Agentes"></a>
+<a href="plugins/csr-cockpit/README.md#2-diffs"><img src="docs/arte/aba-2.svg" height="28" alt="2 Diffs"></a>
+<a href="plugins/csr-cockpit/README.md#3-contexto"><img src="docs/arte/aba-3.svg" height="28" alt="3 Contexto"></a>
+<a href="plugins/csr-cockpit/README.md#4-arquivos"><img src="docs/arte/aba-4.svg" height="28" alt="4 Arquivos"></a>
+<a href="plugins/csr-cockpit/README.md#5-turnos"><img src="docs/arte/aba-5.svg" height="28" alt="5 Turnos"></a>
+
 ```bash
 claude plugin install csr-cockpit@cesarschutz
 ```
