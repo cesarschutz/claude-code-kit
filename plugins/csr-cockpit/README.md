@@ -1,17 +1,22 @@
 # csr-cockpit
 
+<img src="../../docs/arte/cockpit.svg" width="860" alt="A tela do Claude Code com o csr-cockpit: a conversa à esquerda, o painel com cinco abas à direita e a linha de resumo acima do prompt">
+
+[![versão](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcesarschutz%2Fclaude-code-kit%2Fmain%2Fplugins%2Fcsr-cockpit%2F.claude-plugin%2Fplugin.json&query=%24.version&label=vers%C3%A3o&color=d77757&labelColor=262626&style=flat-square)](.claude-plugin/plugin.json)
+[![Claude Code 2.1.287 ou mais novo](https://img.shields.io/badge/Claude%20Code-%E2%89%A5%202.1.287-b1b9f9?labelColor=262626&style=flat-square&logo=claude&logoColor=d77757)](https://code.claude.com/docs)
+[![licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-6e6e6e?labelColor=262626&style=flat-square)](../../LICENSE)
+
 Um painel ao lado da conversa do Claude Code, com os instrumentos da sessão: o que os subagentes
 estão fazendo, o que foi editado, quanto do contexto já foi usado e quais arquivos e comandos
 passaram por ali. Mais uma linha de resumo acima do prompt.
 
-O csr-cockpit só observa. Nenhum dos seus hooks bloqueia, altera ou segura uma chamada de
-ferramenta nem uma resposta do modelo: todos repassam o que receberam e devolvem o resultado como
-veio.
+> [!NOTE]
+> O csr-cockpit só observa. Nenhum dos seus hooks bloqueia, altera ou segura uma chamada de
+> ferramenta nem uma resposta do modelo: todos repassam o que receberam e devolvem o resultado
+> como veio.
 
-<img src="../../docs/csr-cockpit/agentes-rodando.png" width="720" alt="Aba Agentes com dois subagentes rodando: modelo, tempo, contexto, custo e a chamada em curso de cada um">
-
-As imagens desta página vêm de uma sessão real no terminal (Claude Code 2.1.287, modelo Haiku
-4.5), num projeto de exemplo.
+O desenho do topo é uma ilustração da tela. Os prints das abas, mais abaixo, vêm de uma sessão
+real no terminal (Claude Code 2.1.287, modelo Haiku 4.5), num projeto de exemplo.
 
 ## Requisitos
 
@@ -35,13 +40,13 @@ claude plugin install csr-cockpit@cesarschutz
 | Tecla ou comando | O que faz |
 |---|---|
 | `/cockpit` | Abre e fecha o painel |
-| `Esc` | Fecha o painel |
-| `1` a `5` | Trocam de aba, com o painel em foco |
-| `p` `n` | Diff anterior e próximo (aba Diffs) |
-| `t` | Turno anterior (aba Diffs) |
-| `▸ nome` | Abre o detalhe de um agente, de um comando ou de um turno (clique no nome, ou Tab até ele e Enter) |
-| `v` | Volta do detalhe para a lista |
-| `m` | No detalhe de um agente, relê as mensagens dele |
+| <kbd>Esc</kbd> | Fecha o painel |
+| <kbd>1</kbd> a <kbd>5</kbd> | Trocam de aba, com o painel em foco |
+| <kbd>p</kbd> <kbd>n</kbd> | Diff anterior e próximo (aba Diffs) |
+| <kbd>t</kbd> | Turno anterior (aba Diffs) |
+| `▸ nome` | Abre o detalhe de um agente, de um comando ou de um turno (clique no nome, ou <kbd>Tab</kbd> até ele e <kbd>Enter</kbd>) |
+| <kbd>v</kbd> | Volta do detalhe para a lista |
+| <kbd>m</kbd> | No detalhe de um agente, relê as mensagens dele |
 
 Os dados são registrados desde o início da sessão, com o painel aberto ou fechado. Se o painel
 não tiver lugar ao lado da conversa, aparece uma versão compacta acima do prompt, com as mesmas
@@ -66,16 +71,28 @@ plano incluídos. Os parênteses somem quando não houve mudança.
 
 ## As abas
 
+<a href="#1-agentes"><img src="../../docs/arte/aba-1.svg" height="28" alt="1 Agentes"></a>
+<a href="#2-diffs"><img src="../../docs/arte/aba-2.svg" height="28" alt="2 Diffs"></a>
+<a href="#3-contexto"><img src="../../docs/arte/aba-3.svg" height="28" alt="3 Contexto"></a>
+<a href="#4-arquivos"><img src="../../docs/arte/aba-4.svg" height="28" alt="4 Arquivos"></a>
+<a href="#5-turnos"><img src="../../docs/arte/aba-5.svg" height="28" alt="5 Turnos"></a>
+
 ### 1 Agentes
+
+*Quem está trabalhando agora, e em quê?*
 
 Subagentes rodando e concluídos, com contagem. Para cada um: tipo, modelo, tempo decorrido, o
 tamanho do contexto do próprio agente, quanto ele custou, o número de chamadas, a tarefa que
 recebeu e a atividade atual (última ferramenta e argumento). Nos concluídos, a duração, o total de
 tokens e a primeira linha do resultado.
 
+<img src="../../docs/csr-cockpit/agentes-rodando.png" width="720" alt="Aba Agentes com dois subagentes rodando: modelo, tempo, contexto, custo e a chamada em curso de cada um">
+
 <img src="../../docs/csr-cockpit/agentes.png" width="720" alt="Aba Agentes com dois subagentes concluídos, com contexto, custo, chamadas e tokens">
 
 ### 2 Diffs
+
+*O que mudou neste turno?*
 
 Cada Edit e Write do loop principal, agrupado por turno (os últimos 10). Um diff por vez, com
 número de linha, caminho do arquivo e contagem de linhas que entraram e saíram. No Write sobre um
@@ -84,6 +101,8 @@ arquivo que já existia, o conteúdo antigo é lido antes da escrita, para o dif
 <img src="../../docs/csr-cockpit/diffs.png" width="720" alt="Aba Diffs com a edição de um arquivo: linhas que entraram em verde">
 
 ### 3 Contexto
+
+*Quanto do contexto sobra, e quanto já custou?*
 
 Percentual usado, tokens sobre a janela, gráfico dos últimos 12 turnos e quanto o último turno
 acrescentou. Custo da sessão e do último turno, e o limite de uso com o horário de renovação.
@@ -96,6 +115,8 @@ só acontece quando é apertado.
 
 ### 4 Arquivos
 
+*O que foi lido e rodado, e por quem?*
+
 Arquivos lidos (caminho, quantas vezes e por quem) e comandos Bash (status, exit code, duração e
 quem rodou), com um campo de filtro. A pasta do projeto some dos comandos mostrados
 (`find /pasta/do/projeto/src` aparece como `find src`); o detalhe traz o comando inteiro.
@@ -103,6 +124,8 @@ quem rodou), com um campo de filtro. A pasta do projeto some dos comandos mostra
 <img src="../../docs/csr-cockpit/arquivos.png" width="720" alt="Aba Arquivos: arquivos lidos por quem, e comandos Bash com sucesso em verde e falha em vermelho">
 
 ### 5 Turnos
+
+*O que aconteceu, na ordem?*
 
 Um registro por turno da conversa, do mais recente ao mais antigo: o começo do pedido, a duração,
 quanto o turno somou ao contexto, quanto custou, quantas ferramentas foram chamadas, quantas

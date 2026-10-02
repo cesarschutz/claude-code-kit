@@ -57,6 +57,15 @@ Para várias peças que andam juntas, ou para um mod: `plugins/<nome>/` com
 - **Descrição** que diga o que o item faz e, numa skill ou agente, quando o Claude deve usá-lo.
 - **Hook e mod** executam na máquina de quem instala. Diga no README do item o que ele roda.
 
+## A arte dos READMEs
+
+O cartão do topo do README lista o catálogo. Depois de acrescentar, tirar ou renomear um item,
+gere a arte de novo:
+
+```bash
+python3 scripts/arte.py
+```
+
 ## Conferir antes de enviar
 
 ```bash

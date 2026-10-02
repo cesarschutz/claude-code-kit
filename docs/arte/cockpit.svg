@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 396" width="860" height="396" role="img" aria-label="A tela do Claude Code com o csr-cockpit: a conversa à esquerda, o painel com cinco abas à direita e a linha de resumo acima do prompt">
+<title>A tela do Claude Code com o csr-cockpit: a conversa à esquerda, o painel com cinco abas à direita e a linha de resumo acima do prompt</title>
+<style>
+text{font:12px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+.a0{opacity:1;animation:a0 15.6s 1.2s both}@keyframes a0{0%,16.47%{opacity:1}16.67%,83.13%{opacity:0}83.33%,100%{opacity:1}}
+.a1{opacity:0;animation:a1 15.6s 1.2s both}@keyframes a1{0%,16.47%{opacity:0}16.67%,33.13%{opacity:1}33.33%,100%{opacity:0}}
+.a2{opacity:0;animation:a2 15.6s 1.2s both}@keyframes a2{0%,33.13%{opacity:0}33.33%,49.80%{opacity:1}50.00%,100%{opacity:0}}
+.a3{opacity:0;animation:a3 15.6s 1.2s both}@keyframes a3{0%,49.80%{opacity:0}50.00%,66.47%{opacity:1}66.67%,100%{opacity:0}}
+.a4{opacity:0;animation:a4 15.6s 1.2s both}@keyframes a4{0%,66.47%{opacity:0}66.67%,83.13%{opacity:1}83.33%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="860" height="396" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="860" height="396" fill="#262626"/>
+<path d="M25.5 30.1l3.6 3.6l-3.6 3.6" fill="none" stroke="#999999" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="38.4" y="30.8" width="250" height="6.0" rx="2" fill="#6e6e6e"/>
+<circle cx="27.6" cy="66.0" r="3.2" fill="#e8e8e8"/>
+<rect x="38.4" y="62.8" width="300" height="6.0" rx="2" fill="#4a4a4a"/>
+<rect x="38.4" y="82.8" width="240" height="6.0" rx="2" fill="#4a4a4a"/>
+<circle cx="27.6" cy="118.0" r="3.2" fill="#e8e8e8"/>
+<rect x="38.4" y="114.8" width="330" height="6.0" rx="2" fill="#4a4a4a"/>
+<rect x="38.4" y="134.8" width="280" height="6.0" rx="2" fill="#4a4a4a"/>
+<rect x="38.4" y="154.8" width="120" height="6.0" rx="2" fill="#4a4a4a"/>
+<circle cx="27.6" cy="190.0" r="3.2" fill="#4eba65"/>
+<rect x="38.4" y="186.8" width="150" height="6.0" rx="2" fill="#6e6e6e"/>
+<rect x="52.8" y="206.8" width="210" height="6.0" rx="2" fill="#5d3540"/>
+<rect x="52.8" y="226.8" width="200" height="6.0" rx="2" fill="#2f5a3a"/>
+<rect x="24.0" y="306.0" width="36.0" height="17.0" fill="#b1b9f9"/>
+<text x="31.2" y="318" fill="#262626" textLength="21.6" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="67.2" y="318" fill="#e8e8e8" textLength="50.4" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<text x="132.0" y="318" fill="#b1b9f9" textLength="223.2" lengthAdjust="spacing" xml:space="preserve">contexto 22% · US$ 0,15 (+0,02)</text>
+<path d="M24 340L836 340" stroke="#4a4a4a" stroke-width="1"/>
+<path d="M25.5 354.1l3.6 3.6l-3.6 3.6" fill="none" stroke="#e8e8e8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="38.4" y="351" width="7.2" height="14" fill="#e8e8e8"/>
+<path d="M24 376L836 376" stroke="#4a4a4a" stroke-width="1"/>
+<path d="M392 16L392 326" stroke="#b1b9f9" stroke-width="1"/>
+<rect x="408.0" y="26.0" width="36.0" height="17.0" fill="#b1b9f9"/>
+<text x="415.2" y="38" fill="#262626" textLength="21.6" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="451.2" y="38" fill="#e8e8e8" textLength="50.4" lengthAdjust="spacing" xml:space="preserve" class="n">Cockpit</text>
+<path d="M408 70L836 70" stroke="#4a4a4a" stroke-width="1"/>
+<g class="aba a0">
+<text x="408.0" y="58" fill="#d77757" textLength="72.0" lengthAdjust="spacing" xml:space="preserve" class="n">1: Agentes</text>
+<path d="M408 61L480.0 61" stroke="#d77757" stroke-width="1"/>
+<text x="494.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="501.6" y="58" fill="#999999" textLength="50.4" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="566.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="573.6" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="660.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="667.2" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="753.6" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="760.8" y="58" fill="#999999" textLength="57.6" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<text x="408.0" y="98" fill="#b1b9f9" textLength="79.2" lengthAdjust="spacing" xml:space="preserve" class="n">Rodando (2)</text>
+<path d="M409.0 110.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="118" fill="#e8e8e8" textLength="57.6" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<circle cx="483.6" cy="114.0" r="3.2" fill="#b1b9f9"/>
+<text x="494.4" y="118" fill="#999999" textLength="316.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 6,4s · contexto 11,2k · US$ 0,02</text>
+<text x="408.0" y="138" fill="#e8e8e8" textLength="252.0" lengthAdjust="spacing" xml:space="preserve">  Listar funções em src/carrinho.js</text>
+<text x="408.0" y="158" fill="#999999" textLength="158.4" lengthAdjust="spacing" xml:space="preserve">  Read src/carrinho.js</text>
+<path d="M409.0 170.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="178" fill="#e8e8e8" textLength="57.6" lengthAdjust="spacing" xml:space="preserve" class="n">Explore </text>
+<circle cx="483.6" cy="174.0" r="3.2" fill="#b1b9f9"/>
+<text x="494.4" y="178" fill="#999999" textLength="316.8" lengthAdjust="spacing" xml:space="preserve">haiku-4-5 · 5,6s · contexto 11,2k · US$ 0,01</text>
+<text x="408.0" y="198" fill="#e8e8e8" textLength="223.2" lengthAdjust="spacing" xml:space="preserve">  Analisar cobertura dos testes</text>
+<text x="408.0" y="218" fill="#999999" textLength="273.6" lengthAdjust="spacing" xml:space="preserve">  Bash find . -type f -name "*.test.*"</text>
+<text x="408.0" y="258" fill="#e8e8e8" textLength="100.8" lengthAdjust="spacing" xml:space="preserve" class="n">Concluídos (0)</text>
+<text x="408.0" y="278" fill="#999999" textLength="194.4" lengthAdjust="spacing" xml:space="preserve">Nenhum subagente concluído.</text>
+</g>
+<g class="aba a1">
+<text x="408.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="415.2" y="58" fill="#999999" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="494.4" y="58" fill="#d77757" textLength="57.6" lengthAdjust="spacing" xml:space="preserve" class="n">2: Diffs</text>
+<path d="M494.4 61L552.0 61" stroke="#d77757" stroke-width="1"/>
+<text x="566.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="573.6" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="660.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="667.2" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="753.6" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="760.8" y="58" fill="#999999" textLength="57.6" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<text x="408.0" y="98" fill="#e8e8e8" textLength="223.2" lengthAdjust="spacing" xml:space="preserve" class="n">Turno 2 · 1 edição em 1 arquivo</text>
+<text x="408.0" y="138" fill="#e8e8e8" textLength="108.0" lengthAdjust="spacing" xml:space="preserve" class="n">src/carrinho.js</text>
+<text x="516.0" y="138" fill="#999999" textLength="93.6" lengthAdjust="spacing" xml:space="preserve">  +1 −1  Edit</text>
+<text x="408.0" y="158" fill="#999999" textLength="108.0" lengthAdjust="spacing" xml:space="preserve">@@ -9,7 +9,7 @@</text>
+<text x="408.0" y="178" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">   9 </text>
+<text x="444.0" y="178" fill="#e8e8e8" textLength="129.6" lengthAdjust="spacing" xml:space="preserve">      return valor</text>
+<text x="408.0" y="198" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  10 </text>
+<text x="444.0" y="198" fill="#e8e8e8" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">    }</text>
+<text x="408.0" y="218" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  12 </text>
+<text x="444.0" y="218" fill="#ff6b80" textLength="223.2" lengthAdjust="spacing" xml:space="preserve">−   return valor - valor * 0.01</text>
+<text x="408.0" y="238" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  12 </text>
+<text x="444.0" y="238" fill="#4eba65" textLength="216.0" lengthAdjust="spacing" xml:space="preserve">+   return valor - valor * 0.1</text>
+<text x="408.0" y="258" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  13 </text>
+<text x="444.0" y="258" fill="#e8e8e8" textLength="21.6" lengthAdjust="spacing" xml:space="preserve">  }</text>
+</g>
+<g class="aba a2">
+<text x="408.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="415.2" y="58" fill="#999999" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="494.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="501.6" y="58" fill="#999999" textLength="50.4" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="566.4" y="58" fill="#d77757" textLength="79.2" lengthAdjust="spacing" xml:space="preserve" class="n">3: Contexto</text>
+<path d="M566.4 61L645.6 61" stroke="#d77757" stroke-width="1"/>
+<text x="660.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="667.2" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="753.6" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="760.8" y="58" fill="#999999" textLength="57.6" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<text x="408.0" y="98" fill="#d77757" textLength="21.6" lengthAdjust="spacing" xml:space="preserve" class="n">22%</text>
+<text x="429.6" y="98" fill="#999999" textLength="108.0" lengthAdjust="spacing" xml:space="preserve"> do contexto   </text>
+<text x="537.6" y="98" fill="#e8e8e8" textLength="86.4" lengthAdjust="spacing" xml:space="preserve" class="n">44,8k / 200k</text>
+<rect x="408.0" y="109.4" width="345.6" height="9.6" fill="#4a4a4a"/>
+<rect x="408.0" y="109.4" width="79.2" height="9.6" fill="#d77757"/>
+<text x="408.0" y="158" fill="#e8e8e8" textLength="36.0" lengthAdjust="spacing" xml:space="preserve" class="n">Custo</text>
+<text x="408.0" y="178" fill="#999999" textLength="100.8" lengthAdjust="spacing" xml:space="preserve">Sessão        </text>
+<text x="508.8" y="178" fill="#e8e8e8" textLength="57.6" lengthAdjust="spacing" xml:space="preserve" class="n">US$ 0,15</text>
+<text x="408.0" y="198" fill="#999999" textLength="100.8" lengthAdjust="spacing" xml:space="preserve">Último turno  </text>
+<text x="508.8" y="198" fill="#e8e8e8" textLength="57.6" lengthAdjust="spacing" xml:space="preserve" class="n">US$ 0,02</text>
+<text x="408.0" y="238" fill="#e8e8e8" textLength="93.6" lengthAdjust="spacing" xml:space="preserve" class="n">Limite de uso</text>
+<text x="408.0" y="258" fill="#999999" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">5 h      </text>
+<text x="472.8" y="258" fill="#e8e8e8" textLength="36.0" lengthAdjust="spacing" xml:space="preserve" class="n">17%  </text>
+<rect x="508.8" y="249.4" width="172.8" height="9.6" fill="#4a4a4a"/>
+<rect x="508.8" y="249.4" width="28.8" height="9.6" fill="#b1b9f9"/>
+<text x="681.6" y="258" fill="#999999" textLength="115.2" lengthAdjust="spacing" xml:space="preserve">  renova em 2h50</text>
+<text x="408.0" y="278" fill="#999999" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">7 dias   </text>
+<text x="472.8" y="278" fill="#e8e8e8" textLength="36.0" lengthAdjust="spacing" xml:space="preserve" class="n">64%  </text>
+<rect x="508.8" y="269.4" width="172.8" height="9.6" fill="#4a4a4a"/>
+<rect x="508.8" y="269.4" width="108.0" height="9.6" fill="#b1b9f9"/>
+<text x="681.6" y="278" fill="#999999" textLength="122.4" lengthAdjust="spacing" xml:space="preserve">  renova em 45h50</text>
+</g>
+<g class="aba a3">
+<text x="408.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="415.2" y="58" fill="#999999" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="494.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="501.6" y="58" fill="#999999" textLength="50.4" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="566.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="573.6" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="660.0" y="58" fill="#d77757" textLength="79.2" lengthAdjust="spacing" xml:space="preserve" class="n">4: Arquivos</text>
+<path d="M660.0 61L739.2 61" stroke="#d77757" stroke-width="1"/>
+<text x="753.6" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">5</text>
+<text x="760.8" y="58" fill="#999999" textLength="57.6" lengthAdjust="spacing" xml:space="preserve">: Turnos</text>
+<text x="408.0" y="98" fill="#e8e8e8" textLength="129.6" lengthAdjust="spacing" xml:space="preserve" class="n">Arquivos lidos (4)</text>
+<text x="408.0" y="118" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  1× </text>
+<text x="444.0" y="118" fill="#e8e8e8" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">README.md</text>
+<text x="508.8" y="118" fill="#999999" textLength="86.4" lengthAdjust="spacing" xml:space="preserve"> · principal</text>
+<text x="408.0" y="138" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  3× </text>
+<text x="444.0" y="138" fill="#e8e8e8" textLength="108.0" lengthAdjust="spacing" xml:space="preserve">src/carrinho.js</text>
+<text x="552.0" y="138" fill="#999999" textLength="151.2" lengthAdjust="spacing" xml:space="preserve"> · Explore, principal</text>
+<text x="408.0" y="158" fill="#999999" textLength="36.0" lengthAdjust="spacing" xml:space="preserve">  1× </text>
+<text x="444.0" y="158" fill="#e8e8e8" textLength="151.2" lengthAdjust="spacing" xml:space="preserve">test/carrinho.test.js</text>
+<text x="595.2" y="158" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve"> · Explore</text>
+<text x="408.0" y="198" fill="#e8e8e8" textLength="122.4" lengthAdjust="spacing" xml:space="preserve" class="n">Comandos Bash (8)</text>
+<path d="M409.0 210.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="218" fill="#e8e8e8" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">npm test </text>
+<path d="M488.0 214.2l2.0 2.4l3.8 -6.0" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="501.6" y="218" fill="#999999" textLength="28.8" lengthAdjust="spacing" xml:space="preserve">0,5s</text>
+<path d="M409.0 230.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="238" fill="#e8e8e8" textLength="180.0" lengthAdjust="spacing" xml:space="preserve">find test -type f | sort </text>
+<path d="M603.2 234.2l2.0 2.4l3.8 -6.0" fill="none" stroke="#4eba65" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="616.8" y="238" fill="#999999" textLength="100.8" lengthAdjust="spacing" xml:space="preserve">0,1s · Explore</text>
+<path d="M409.0 250.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="258" fill="#e8e8e8" textLength="108.0" lengthAdjust="spacing" xml:space="preserve">tree test -L 3 </text>
+<path d="M531.4 250.8l5.0 6.0m0 -6.0l-5.0 6.0" fill="none" stroke="#ff6b80" stroke-width="1.6" stroke-linecap="round"/>
+<text x="544.8" y="258" fill="#999999" textLength="180.0" lengthAdjust="spacing" xml:space="preserve">exit 127 · 0,0s · Explore</text>
+<path d="M409.0 270.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="278" fill="#e8e8e8" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">npm test </text>
+<path d="M488.2 270.8l5.0 6.0m0 -6.0l-5.0 6.0" fill="none" stroke="#ff6b80" stroke-width="1.6" stroke-linecap="round"/>
+<text x="501.6" y="278" fill="#999999" textLength="93.6" lengthAdjust="spacing" xml:space="preserve">exit 1 · 0,5s</text>
+</g>
+<g class="aba a4">
+<text x="408.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">1</text>
+<text x="415.2" y="58" fill="#999999" textLength="64.8" lengthAdjust="spacing" xml:space="preserve">: Agentes</text>
+<text x="494.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">2</text>
+<text x="501.6" y="58" fill="#999999" textLength="50.4" lengthAdjust="spacing" xml:space="preserve">: Diffs</text>
+<text x="566.4" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">3</text>
+<text x="573.6" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Contexto</text>
+<text x="660.0" y="58" fill="#b1b9f9" textLength="7.2" lengthAdjust="spacing" xml:space="preserve">4</text>
+<text x="667.2" y="58" fill="#999999" textLength="72.0" lengthAdjust="spacing" xml:space="preserve">: Arquivos</text>
+<text x="753.6" y="58" fill="#d77757" textLength="64.8" lengthAdjust="spacing" xml:space="preserve" class="n">5: Turnos</text>
+<path d="M753.6 61L818.4 61" stroke="#d77757" stroke-width="1"/>
+<text x="408.0" y="98" fill="#e8e8e8" textLength="72.0" lengthAdjust="spacing" xml:space="preserve" class="n">Turnos (3)</text>
+<text x="480.0" y="98" fill="#999999" textLength="151.2" lengthAdjust="spacing" xml:space="preserve"> · US$ 0,15 na sessão</text>
+<path d="M409.0 130.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="138" fill="#e8e8e8" textLength="57.6" lengthAdjust="spacing" xml:space="preserve">Turno 3 </text>
+<text x="480.0" y="138" fill="#999999" textLength="28.8" lengthAdjust="spacing" xml:space="preserve">7,5s</text>
+<text x="408.0" y="158" fill="#e8e8e8" textLength="403.2" lengthAdjust="spacing" xml:space="preserve">  Acrescente ao README.md uma linha dizendo que o cupom…</text>
+<text x="408.0" y="178" fill="#999999" textLength="410.4" lengthAdjust="spacing" xml:space="preserve">  +1,1k de contexto · US$ 0,02 · 2 ferramentas · 1 edição</text>
+<path d="M409.0 210.6v6.7l5.0 -3.4z" fill="#e8e8e8"/>
+<text x="422.4" y="218" fill="#e8e8e8" textLength="57.6" lengthAdjust="spacing" xml:space="preserve">Turno 1 </text>
+<text x="480.0" y="218" fill="#999999" textLength="21.6" lengthAdjust="spacing" xml:space="preserve">27s</text>
+<text x="501.6" y="218" fill="#ff6b80" textLength="79.2" lengthAdjust="spacing" xml:space="preserve"> · 2 falhas</text>
+<text x="408.0" y="238" fill="#e8e8e8" textLength="374.4" lengthAdjust="spacing" xml:space="preserve">  Rode 2 agentes Explore ao mesmo tempo, em segundo…</text>
+<text x="408.0" y="258" fill="#999999" textLength="367.2" lengthAdjust="spacing" xml:space="preserve">  US$ 0,11 · 13 ferramentas · 2 retornos de agentes</text>
+</g>
+</g>
+<rect x=".5" y=".5" width="859" height="395" rx="9.5" fill="none" stroke="#4a4a4a"/>
+</svg>
