@@ -43,20 +43,35 @@ const uso = (tokens: number, percent: number, usd: number): SessionUsage => ({
   cost: { usd },
 })
 
-test('status line: cada parte com o seu nome, só quando há leitura', async ($, on) => {
+const FAIXA = { plugin: MOD, component: 'AbovePrompt' } as const
+
+// O texto da linha de resumo, sem o selo.
+const resumoDe = async (ui: Achados) =>
+  (await ui.find({ type: 'Text', text: /^ +(contexto|limite|agentes) / }))?.text?.trim()
+
+test('linha de resumo: em azul na faixa acima do prompt, cada parte com o seu nome', async ($, on) => {
   const motor = ligar(on)
   motor.uso = uso(134_400, 67, 1.84)
   await $.session.start(INICIO)
-  expect(motor.visto.status.at(-1)).toBe('contexto 67% · US$ 1,84')
 
+  for (const surface of SUPERFICIES) {
+    const ui = await $.ui.mount({ ...FAIXA, surface, props: faixa() })
+    const selo = await ui.find({ type: 'Text', text: /^ CSR $/ })
+    expect(selo?.props.color).toBe('suggestion')
+    expect(selo?.props.inverse).toBe(true)
+    await mostra(ui, /^ Cockpit$/)
+    expect(await resumoDe(ui)).toBe('contexto 67% · US$ 1,84')
+    expect(await corDe(ui, /^ +contexto /)).toBe('suggestion')
+    await ui.unmount()
+  }
+
+  const ui = await $.ui.mount({ ...FAIXA, surface: 'desktop', props: faixa() })
   const explore = await $.agent.spawn(subagente('t1', 'Explore', 'procurar hooks'))
   await $.agent.spawn(subagente('t2', 'Plan', 'planejar'))
-  expect(motor.visto.status.at(-1)).toBe('contexto 67% · US$ 1,84 · agentes 2 rodando')
+  expect(await resumoDe(ui)).toBe('contexto 67% · US$ 1,84 · agentes 2 rodando')
 
   await $.turn.complete(fimDoTurno('s1', 'Pronto.', 4000, explore.agentId))
-  expect(motor.visto.status.at(-1)).toBe(
-    'contexto 67% · US$ 1,84 · agentes 1 rodando, 1 concluído',
-  )
+  expect(await resumoDe(ui)).toBe('contexto 67% · US$ 1,84 · agentes 1 rodando, 1 concluído')
 
   await $.session.measure({
     context: { tokens: 152_600, window: 200_000, percent: 76 },
@@ -67,15 +82,23 @@ test('status line: cada parte com o seu nome, só quando há leitura', async ($,
     cost: { usd: 2.05 },
     changed: ['context', 'cost', 'rateLimits'],
   })
-  expect(motor.visto.status.at(-1)).toBe(
+  expect(await resumoDe(ui)).toBe(
     'contexto 76% · US$ 2,05 · limite 5h 38%, 7d 60% · agentes 1 rodando, 1 concluído',
   )
+  await ui.unmount()
+
+  // A status line do Claude Code (a linha amarela) não é usada.
+  expect(motor.visto.status).toEqual([])
 })
 
-test('status line: sessão recém-aberta, sem leitura nenhuma, não mostra linha', async ($, on) => {
+test('linha de resumo: sessão recém-aberta, sem leitura nenhuma, não mostra linha', async ($, on) => {
   const motor = ligar(on)
   motor.uso = { startedAt: AGORA, context: { window: 200_000 }, rateLimits: [] }
   await $.session.start(INICIO)
+  const ui = await $.ui.mount({ ...FAIXA, surface: 'terminal', props: faixa() })
+  expect(await ui.find({ type: 'Text', text: /^ CSR $/ })).toBeUndefined()
+  expect(await resumoDe(ui)).toBeUndefined()
+  await ui.unmount()
   expect(motor.visto.status).toEqual([])
 })
 
@@ -94,19 +117,29 @@ test('aba 1, Agentes: rodando com atividade, concluídos com duração e resulta
     const ui = await $.ui.mount({ ...PAINEL, surface, props: painel() })
     await mostra(ui, 'Rodando (1)')
     expect(await corDe(ui, 'Rodando (1)')).toBe('suggestion')
-    await mostra(ui, /Explore · haiku-4-5 · 1m12s · 1 chamada/)
-    await mostra(ui, '  procurar hooks')
+    // O nome é o botão que abre o detalhe, e fica sublinhado com o mouse na linha.
+    const nome = await ui.find({ key: `ver-agente-${String(explore.agentId)}` })
+    expect(nome?.props.label).toBe('▸ Explore')
+    expect(JSON.stringify(await ui.drawn())).toMatch(
+      /"hover":\{"underline":true,"color":"suggestion"\}/,
+    )
+    await mostra(ui, /^ haiku-4-5 · 1m12s · 1 chamada$/)
+    await mostra(ui, 'procurar hooks')
     await mostra(ui, 'Read src/a.ts')
-    expect(await corDe(ui, /^● $/)).toBe('suggestion')
+    expect(await corDe(ui, /^●$/)).toBe('suggestion')
 
     await mostra(ui, 'Concluídos (2)')
-    await mostra(ui, /Plan · haiku-4-5 · 1m35s/)
+    expect((await ui.find({ key: `ver-agente-${String(plan.agentId)}` }))?.props.label).toBe('▸ Plan')
+    await mostra(ui, /^ haiku-4-5 · 1m35s$/)
     await mostra(ui, 'Plano em 3 passos')
     await naoMostra(ui, 'detalhes')
-    expect(await corDe(ui, /^✓ $/)).toBe('success')
-    await mostra(ui, /revisor-de-posts · haiku-4-5 · 12s/)
+    expect(await corDe(ui, /^✓$/)).toBe('success')
+    expect((await ui.find({ key: `ver-agente-${String(revisor.agentId)}` }))?.props.label).toBe(
+      '▸ revisor-de-posts',
+    )
+    await mostra(ui, /^ haiku-4-5 · 12s$/)
     await mostra(ui, 'terminou por error')
-    expect(await corDe(ui, /^✗ $/)).toBe('error')
+    expect(await corDe(ui, /^✗$/)).toBe('error')
     await ui.unmount()
   }
 })
@@ -307,17 +340,23 @@ test('aba 4, Arquivos e comandos: leituras por autor, status do Bash e filtro', 
     await naoMostra(ui, 'segredo')
 
     await mostra(ui, 'Comandos Bash (3)')
-    await mostra(ui, /^✓ npm run check · \d+,\ds$/)
-    await mostra(ui, /^✗ npm test · exit 1 · \d+,\ds$/)
-    await mostra(ui, /^● sleep 60 · rodando · 5,0s$/)
-    expect(await corDe(ui, /^✓ $/)).toBe('success')
-    expect(await corDe(ui, /^✗ $/)).toBe('error')
-    expect(await corDe(ui, /^● $/)).toBe('suggestion')
+    // O comando é o botão que abre o detalhe.
+    const comandos = async () =>
+      (await ui.findAll({ type: 'Button' }))
+        .filter(botao => String(botao.key).startsWith('ver-comando-'))
+        .map(botao => botao.props.label)
+    expect(await comandos()).toEqual(['▸ sleep 60', '▸ npm test', '▸ npm run check'])
+    await mostra(ui, /^ \d+,\ds$/)
+    await mostra(ui, /^ exit 1 · \d+,\ds$/)
+    await mostra(ui, /^ rodando · 5,0s$/)
+    expect(await corDe(ui, /^✓$/)).toBe('success')
+    expect(await corDe(ui, /^✗$/)).toBe('error')
+    expect(await corDe(ui, /^●$/)).toBe('suggestion')
 
     await ui.input({ key: 'filtro', text: 'NPM', kind: 'change' })
     await mostra(ui, 'Arquivos lidos (0)')
     await mostra(ui, 'Comandos Bash (2)')
-    await naoMostra(ui, 'sleep 60')
+    expect(await comandos()).toEqual(['▸ npm test', '▸ npm run check'])
     await ui.input({ key: 'filtro', text: 'docs' })
     await mostra(ui, 'Arquivos lidos (1)')
     await mostra(ui, 'Comandos Bash (0)')
@@ -330,7 +369,9 @@ test('aba 4, Arquivos e comandos: leituras por autor, status do Bash e filtro', 
   await pendente
   const ui = await $.ui.mount({ ...PAINEL, surface: 'desktop', props: painel('dock', 100) })
   await ui.press({ key: 'aba-4' })
-  await mostra(ui, /^✓ sleep 60 · \d+,\ds$/)
+  // Solto o comando, ele termina: não há mais nenhum rodando.
+  await mostra(ui, 'Comandos Bash (3)')
+  expect(await ui.find({ type: 'Text', text: /^●$/ })).toBeUndefined()
   await ui.unmount()
 })
 
@@ -361,16 +402,211 @@ test('aba 5, Turnos: duração, contexto somado, custo, ferramentas e falhas de 
     await mostra(ui, 'Turnos (2)')
 
     // O turno em curso, em azul, com o tempo correndo.
-    await mostra(ui, /^Turno 2$/)
-    expect(await corDe(ui, /^ · em andamento · 5,0s$/)).toBe('suggestion')
-    await mostra(ui, '  segundo pedido')
+    expect((await ui.find({ key: 'ver-turno-2' }))?.props.label).toBe('▸ Turno 2')
+    const emCurso = await ui.findAll({ type: 'Text', text: /^em andamento · 5,0s$/ })
+    expect(emCurso.map(texto => texto.props.color)).toContain('suggestion')
+    await mostra(ui, 'segundo pedido')
 
     // O turno fechado: duração, falhas em vermelho, o pedido e os números.
-    await mostra(ui, /^Turno 1$/)
-    await mostra(ui, /^ · 1m12s$/)
+    expect((await ui.find({ key: 'ver-turno-1' }))?.props.label).toBe('▸ Turno 1')
+    await mostra(ui, /^1m12s$/)
     expect(await corDe(ui, /^ · 1 falha$/)).toBe('error')
-    await mostra(ui, '  ajusta o README e publica')
-    await mostra(ui, '  +5,5k de contexto · US$ 0,20 · 3 ferramentas · 1 edição')
+    await mostra(ui, 'ajusta o README e publica')
+    await mostra(ui, '+5,5k de contexto · US$ 0,20 · 3 ferramentas · 1 edição')
+    await ui.press({ key: 'aba-1' })
+    await ui.unmount()
+  }
+})
+
+test('turnos agrupados: o retorno de um agente em segundo plano entra no turno do pedido', async ($, on) => {
+  const motor = ligar(on)
+  motor.uso = uso(80_000, 40, 1.2)
+  motor.responder = () => ({ result: { structuredPatch: [] }, text: 'ok' })
+  await $.session.start(INICIO)
+
+  await $.turn.start({ text: 'rode 2 agentes', turnId: 't1' })
+  const um = await $.agent.spawn(subagente('a1', 'Explore', 'previsão de Lisboa'))
+  const dois = await $.agent.spawn(subagente('a2', 'Plan', 'previsão de Tóquio'))
+  await $.tool.call({ tool: 'Read', file_path: '/proj/a.ts' })
+  await $.turn.complete(fimDoTurno('t1', 'Agentes lançados.', 4000))
+
+  // O Claude Code abre um turno sozinho a cada agente que volta.
+  await $.turn.start({
+    text: `<task-notification>\n<task-id>${String(um.agentId)}</task-id>\n<result>Lisboa: sol</result>\n</task-notification>`,
+    turnId: 't2',
+  })
+  await $.tool.call({ tool: 'Edit', file_path: '/proj/a.ts', old_string: 'a', new_string: 'b' })
+  await $.turn.complete(fimDoTurno('t2', 'Lisboa pronta.', 3000))
+  await $.turn.start({
+    text: `<agent-message from="${String(dois.agentId)}"> [Subagent hand-back] Tóquio: chuva</agent-message>`,
+    turnId: 't3',
+  })
+  await $.turn.complete(fimDoTurno('t3', 'As duas previsões estão prontas.', 2000))
+
+  await $.turn.start({ text: 'obrigado', turnId: 't4' })
+  await $.turn.complete(fimDoTurno('t4', 'De nada.', 1000))
+
+  for (const surface of SUPERFICIES) {
+    const ui = await $.ui.mount({ ...PAINEL, surface, props: painel('dock', 100) })
+    await ui.press({ key: 'aba-5' })
+    // Quatro turnos do motor, dois pedidos da pessoa.
+    await mostra(ui, 'Turnos (2)')
+    expect((await ui.find({ key: 'ver-turno-2' }))?.props.label).toBe('▸ Turno 2')
+    await mostra(ui, 'obrigado')
+    await mostra(ui, 'rode 2 agentes')
+    await mostra(ui, /^9,0s$/)
+    await mostra(ui, '2 ferramentas · 1 edição · 2 retornos de agentes')
+    expect(await ui.find({ key: 'ver-turno-3' })).toBeUndefined()
+
+    await ui.press({ key: 'ver-turno-1' })
+    expect((await ui.find({ type: 'Code', text: 'rode 2 agentes' }))?.text).toBe('rode 2 agentes')
+    expect(await ui.find({ type: 'Markdown', text: 'Agentes lançados.' })).toBeDefined()
+    await mostra(ui, 'Depois do retorno do agente Explore')
+    expect(await ui.find({ type: 'Markdown', text: 'Lisboa pronta.' })).toBeDefined()
+    await mostra(ui, 'Depois do retorno do agente Plan')
+    expect(await ui.find({ type: 'Markdown', text: 'As duas previsões estão prontas.' })).toBeDefined()
+    await mostra(ui, /^Read 1 · Edit 1$/)
+    await ui.press({ key: 'voltar' })
+
+    // A edição feita no retorno do agente fica nos diffs do turno 1.
+    await ui.press({ key: 'aba-2' })
+    await mostra(ui, 'Turno 1 · 1 edição em 1 arquivo')
+
+    // Sem resposta própria, o agente mostra o que devolveu ao loop principal.
+    await ui.press({ key: 'aba-1' })
+    await ui.press({ key: `ver-agente-${String(dois.agentId)}` })
+    expect(await ui.find({ type: 'Markdown', text: 'Tóquio: chuva' })).toBeDefined()
+    await ui.press({ key: 'voltar' })
+    await ui.unmount()
+  }
+})
+
+test('detalhe de um agente: pedido, chamadas, mensagens, tokens e resultado', async ($, on) => {
+  const motor = ligar(on)
+  motor.responder = e =>
+    e.command === 'npm test'
+      ? { isError: true, result: 'Exit code 1', text: 'Exit code 1' }
+      : { result: {}, text: 'ok' }
+  motor.mensagens = [
+    { role: 'user', text: 'Tarefa de Explore', toolUses: [] },
+    { role: 'assistant', text: 'Vou começar pelo **README**.', toolUses: [] },
+    { role: 'assistant', text: '', toolUses: [] },
+  ]
+  await $.session.start(INICIO)
+  const explore = await $.agent.spawn(subagente('t1', 'Explore', 'procurar hooks'))
+  const id = String(explore.agentId)
+  await $.tool.call(doAgente({ tool: 'Read', file_path: '/proj/README.md' }, id))
+  await $.tool.call(doAgente({ tool: 'Bash', command: 'npm test' }, id))
+
+  for (const surface of SUPERFICIES) {
+    const ui = await $.ui.mount({ ...PAINEL, surface, props: painel('dock', 100) })
+    await ui.press({ key: `ver-agente-${id}` })
+    expect((await ui.find({ key: 'voltar' }))?.props.hotkey).toBe('v')
+    await mostra(ui, /Explore/)
+    expect((await ui.find({ type: 'Markdown', text: 'Tarefa de Explore' }))?.props.dimColor).toBe(true)
+    await mostra(ui, 'Chamadas (2)')
+    await mostra(ui, /^Read README\.md$/)
+    expect(await corDe(ui, /^✗ $/)).toBe('error')
+    // As mensagens vêm da transcrição do agente, lida ao abrir.
+    expect(await ui.find({ type: 'Markdown', text: 'Vou começar pelo **README**.' })).toBeDefined()
+    await ui.press({ key: 'voltar' })
+    await mostra(ui, 'Rodando (1)')
+    await ui.unmount()
+  }
+
+  expect(motor.visto.ordem.filter(passo => passo === `session.messages ${id}`)).toHaveLength(2)
+
+  await $.turn.complete({
+    ...fimDoTurno('s1', '## Achado\nO hook fica em `src/a.ts`.', 9000, id),
+    usage: {
+      input_tokens: 1200,
+      output_tokens: 800,
+      cache_read_input_tokens: 40_000,
+      cache_creation_input_tokens: 2000,
+      model: 'claude-haiku-4-5-20251001',
+    },
+  })
+
+  const ui = await $.ui.mount({ ...PAINEL, surface: 'desktop', props: painel('dock', 100) })
+  await mostra(ui, / · 44k tokens$/)
+  await ui.press({ key: `ver-agente-${id}` })
+  await mostra(ui, 'Entrada 43,2k (40k lidos do cache) · saída 800')
+  expect(await ui.find({ type: 'Markdown', text: 'O hook fica em `src/a.ts`.' })).toBeDefined()
+  await mostra(ui, 'Resposta final')
+  expect((await ui.find({ key: 'mensagens' }))?.props.hotkey).toBe('m')
+  // Trocar de aba fecha o detalhe.
+  await ui.press({ key: 'aba-2' })
+  await ui.press({ key: 'aba-1' })
+  await mostra(ui, 'Concluídos (1)')
+  await ui.unmount()
+})
+
+test('detalhe de um comando: comando inteiro e saída, sem caracteres de controle', async ($, on) => {
+  const motor = ligar(on)
+  motor.responder = e =>
+    e.command === 'npm test'
+      ? { isError: true, result: 'Exit code 1\n2 falhas', text: 'Exit code 1\n2 falhas' }
+      : {
+          result: { stdout: '\u001b[32mok\u001b[0m\r\nfim\n', stderr: 'aviso', interrupted: false },
+          text: 'ok',
+        }
+  await $.session.start(INICIO)
+  await $.tool.call({ tool: 'Bash', command: 'npm run check', description: 'Confere os tipos' })
+  await $.tool.call({ tool: 'Bash', command: 'npm test' })
+
+  for (const surface of SUPERFICIES) {
+    const ui = await $.ui.mount({ ...PAINEL, surface, props: painel('dock', 100) })
+    await ui.press({ key: 'aba-4' })
+    const botoes = (await ui.findAll({ type: 'Button' })).filter(botao =>
+      String(botao.key).startsWith('ver-comando-'),
+    )
+    expect(botoes).toHaveLength(2)
+
+    // O mais recente vem primeiro: o que falhou.
+    await ui.press({ key: String(botoes[0]?.key) })
+    await mostra(ui, /exit 1/)
+    expect((await ui.find({ type: 'Code', text: 'npm test' }))?.props.language).toBe('bash')
+    expect(await ui.find({ type: 'Code', text: 'Exit code 1\n2 falhas' })).toBeDefined()
+    await ui.press({ key: 'voltar' })
+
+    await ui.press({ key: String(botoes[1]?.key) })
+    await mostra(ui, 'Confere os tipos')
+    // As cores ANSI e o \r saem; sobra o texto.
+    expect((await ui.find({ type: 'Code', text: 'ok\nfim' }))?.text).toBe('ok\nfim')
+    await mostra(ui, 'Saída de erro')
+    await ui.press({ key: 'voltar' })
+    await mostra(ui, 'Comandos Bash (2)')
+    await ui.press({ key: 'aba-1' })
+    await ui.unmount()
+  }
+})
+
+test('detalhe de um turno: pedido e resposta inteiros e ferramentas usadas', async ($, on) => {
+  const motor = ligar(on)
+  motor.uso = uso(80_000, 40, 1.2)
+  const pedido = `ajusta o README\ne publica\n${'detalhe '.repeat(30)}`
+  await $.session.start(INICIO)
+  await $.turn.start({ text: pedido, turnId: 't1' })
+  await $.tool.call({ tool: 'Read', file_path: '/proj/README.md' })
+  await $.tool.call({ tool: 'Read', file_path: '/proj/a.ts' })
+  await $.tool.call({ tool: 'Bash', command: 'ls' })
+  await $.turn.complete(fimDoTurno('t1', '**Feito.** O README foi ajustado.', 72_000))
+  motor.uso = uso(85_500, 43, 1.4)
+  await $.session.measure({ ...motor.uso, changed: ['context', 'cost'] })
+
+  for (const surface of SUPERFICIES) {
+    const ui = await $.ui.mount({ ...PAINEL, surface, props: painel('dock', 100) })
+    await ui.press({ key: 'aba-5' })
+    await ui.press({ key: 'ver-turno-1' })
+    await mostra(ui, /^Turno 1$/)
+    await mostra(ui, '+5,5k de contexto · US$ 0,20')
+    await mostra(ui, 'Ferramentas (3)')
+    await mostra(ui, /^Read 2 · Bash 1$/)
+    // O pedido inteiro, e não só a primeira linha da lista.
+    expect((await ui.find({ type: 'Code', text: 'e publica' }))?.text).toBe(pedido)
+    expect(await ui.find({ type: 'Markdown', text: '**Feito.** O README foi ajustado.' })).toBeDefined()
+    await ui.press({ key: 'voltar' })
+    await mostra(ui, 'Turnos (1)')
     await ui.press({ key: 'aba-1' })
     await ui.unmount()
   }
@@ -407,7 +643,8 @@ test('/cockpit abre com foco e Esc fechando, e fecha na segunda vez; 1 a 5 troca
   const motor = ligar(on)
   await $.session.start(INICIO)
 
-  expect((await $.command.run(COMANDO)).text).toMatch(/aberto/)
+  // Abrir e fechar não escrevem nada na conversa: o painel é a resposta.
+  expect((await $.command.run(COMANDO)).text).toBeUndefined()
   expect(motor.visto.abertos).toEqual([{ id: MOD, focus: true, closeOnEscape: true }])
 
   for (const surface of SUPERFICIES) {
@@ -432,14 +669,12 @@ test('/cockpit abre com foco e Esc fechando, e fecha na segunda vez; 1 a 5 troca
     await ui.unmount()
   }
 
-  expect((await $.command.run(COMANDO)).text).toMatch(/fechado/)
+  expect((await $.command.run(COMANDO)).text).toBeUndefined()
   expect(motor.visto.fechados).toEqual([MOD])
 })
 
 test('sem lugar ao lado: versão compacta acima do prompt', async ($, on) => {
   const motor = ligar(on)
-  // Com a faixa fechada, o mod passa a vez: o motor desenha o que é dele.
-  on('ui.render', { component: 'AbovePrompt' }, () => ({ type: 'Box', children: [] }))
   await $.session.start(INICIO)
   const explore = await $.agent.spawn(subagente('t1', 'Explore', 'procurar hooks'))
   await $.tool.call(doAgente({ tool: 'Read', file_path: '/proj/src/a.ts' }, explore.agentId))
@@ -481,5 +716,5 @@ test('sem lugar ao lado: versão compacta acima do prompt', async ($, on) => {
 
   // /cockpit também fecha a faixa.
   expect((await $.command.run(COMANDO)).text).toMatch(/compacta/)
-  expect((await $.command.run(COMANDO)).text).toMatch(/fechado/)
+  expect((await $.command.run(COMANDO)).text).toBeUndefined()
 })

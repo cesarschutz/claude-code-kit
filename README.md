@@ -32,7 +32,9 @@ instalado com a sessão aberta entra com `/reload-plugins`.
 
 Um painel ao lado da conversa com os instrumentos da sessão, em cinco abas: subagentes, diffs do
 turno, uso do contexto e custo, arquivos lidos e comandos executados, e o histórico dos turnos. Uma
-status line resume contexto, custo, limite de uso e agentes. O mod só observa: não bloqueia nem altera nenhuma chamada de ferramenta.
+linha acima do prompt resume contexto, custo, limite de uso e agentes. Clicar no nome de um agente,
+de um comando ou de um turno abre o detalhe: o pedido, as chamadas e a resposta. O mod só observa:
+não bloqueia nem altera nenhuma chamada de ferramenta.
 
 ```
  CSR  Cockpit
@@ -82,7 +84,7 @@ claude plugin install explicar-erro@cesarschutz
 | Hook | Um comando ligado a um evento da sessão | Roda sozinho no evento |
 | Estilo de saída | Um jeito de responder | Você escolhe em `/output-style` |
 | Tema | Cores do terminal | Você escolhe em `/theme` |
-| Mod | Código que roda dentro do Claude Code e desenha na interface | Acrescenta painéis, comandos e status line |
+| Mod | Código que roda dentro do Claude Code e desenha na interface | Acrescenta painéis, comandos e linhas na tela |
 | Pacote | Um plugin com várias peças | Tudo o que está dentro vem junto |
 
 Cada linha do catálogo é instalada inteira e separada das outras. Uma peça avulsa traz só ela; um

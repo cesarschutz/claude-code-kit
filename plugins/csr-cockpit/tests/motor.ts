@@ -5,6 +5,7 @@ import type {
   AgentInfo,
   On,
   RenderPropsOf,
+  SessionMessage,
   SessionUsage,
   SessionUsageArgs,
   ToolCallResult,
@@ -33,6 +34,8 @@ export type Motor = {
   uso: SessionUsage
   arquivos: Record<string, string>
   agentes: AgentInfo[]
+  // A transcrição que $.session.messages devolve para um subagente.
+  mensagens: SessionMessage[]
   // Sem lugar para o painel: $.ui.open responde isPlaced false.
   semLugar: boolean
   // O que o fundo responde a cada tool.call; trocável por teste.
@@ -76,6 +79,7 @@ export const ligar = (on: On): Motor => {
     uso: usoInicial(),
     arquivos: {},
     agentes: [],
+    mensagens: [],
     semLugar: false,
     responder: e => ({ result: { tool: e.tool }, text: 'ok' }),
   }
@@ -92,6 +96,11 @@ export const ligar = (on: On): Motor => {
   })
   on('command.register', (_, e) => ({ value: { command: e.name } }))
   on('agent.list', () => ({ value: motor.agentes }))
+  on('session.messages', (_, e) => {
+    motor.visto.ordem.push(`session.messages ${String(e.agentId ?? 'principal')}`)
+
+    return { value: motor.mensagens }
+  })
   on('session.usage', (_, e: SessionUsageArgs) => {
     motor.visto.usos.push(e.breakdown ?? 'simples')
 
@@ -157,6 +166,8 @@ export const ligar = (on: On): Motor => {
   on('turn.start', (_, e) => ({ turnId: e.turnId }))
   on('turn.complete', (_, e) => ({ text: e.answer }))
   on('session.measure', (_, e) => ({ changed: e.changed }))
+  // O que o motor desenharia na faixa acima do prompt: nada.
+  on('ui.render', { component: 'AbovePrompt' }, () => ({ type: 'Box', children: [] }))
 
   return motor
 }

@@ -12,6 +12,13 @@ export type CockpitUi = {
   turno: number
   passo: number
   isCalculando: boolean
+  // O item aberto em detalhe (um agente, um comando ou um turno), se houver.
+  foco?: CockpitFoco
+}
+
+export type CockpitFoco = {
+  tipo: 'agente' | 'comando' | 'turno'
+  id: string
 }
 
 export type CockpitAgente = {
@@ -26,6 +33,8 @@ export type CockpitAgente = {
   argumento?: string
   chamadas: number
   resultado?: string
+  // Total de tokens que o agente consumiu, quando o motor informa.
+  tokens?: number
 }
 
 export type CockpitLinha = {
@@ -105,11 +114,19 @@ export type CockpitComando = {
   inicio: number
   duracaoMs?: number
   quem: string
+  // Onde está o detalhe do comando (o id do membro em fichasDeComandos).
+  ficha?: string
 }
 
 // Um turno do loop principal, para a aba Turnos.
 export type CockpitRodada = {
   n: number
+  // O número do pedido da pessoa a que o turno pertence: o turno que ela abriu
+  // e os retornos automáticos dos agentes dele levam o mesmo número.
+  ordem?: number
+  // Turno aberto pelo retorno de um agente em segundo plano, não pela pessoa.
+  isRetorno?: boolean
+  agenteId?: string
   // O começo do pedido que abriu o turno, numa linha.
   pedido: string
   inicio: number
@@ -121,6 +138,51 @@ export type CockpitRodada = {
   custo?: number
   ferramentas: number
   falhas: number
+  // Quantas vezes cada ferramenta foi chamada no turno.
+  porFerramenta?: Record<string, number>
+}
+
+// Uma chamada de ferramenta de um subagente, para o detalhe dele.
+export type CockpitPasso = {
+  id: string
+  ferramenta: string
+  argumento: string
+  estado: 'rodando' | 'ok' | 'falhou'
+  duracaoMs?: number
+}
+
+export type CockpitTokens = {
+  entrada: number
+  saida: number
+  cacheLido: number
+  cacheGravado: number
+  modelo: string
+}
+
+// O detalhe de um subagente: o pedido que recebeu, as últimas chamadas, as
+// últimas mensagens que escreveu e, ao terminar, a resposta e os tokens.
+export type CockpitFichaDoAgente = {
+  pedido: string
+  passos: CockpitPasso[]
+  mensagens?: string[]
+  resposta?: string
+  tokens?: CockpitTokens
+}
+
+// O detalhe de um comando Bash: o comando inteiro e o fim da saída.
+export type CockpitFichaDoComando = {
+  id: string
+  comando: string
+  descricao?: string
+  saida?: string
+  erro?: string
+}
+
+// O detalhe de um turno: o pedido e a resposta inteiros.
+export type CockpitFichaDoTurno = {
+  n: number
+  pedido: string
+  resposta?: string
 }
 
 declare module 'claude-code' {
@@ -134,6 +196,11 @@ declare module 'claude-code' {
       comandos: CockpitComando[]
       turno: number
       rodadas: CockpitRodada[]
+      serie: number
+      pedidos: number
+      fichasDeAgentes: StateFamily<CockpitFichaDoAgente>
+      fichasDeComandos: StateFamily<CockpitFichaDoComando>
+      fichasDeTurnos: StateFamily<CockpitFichaDoTurno>
     }
   }
 }

@@ -5,8 +5,10 @@
 import type {
   BoxProps,
   ButtonProps,
+  CodeProps,
   ElementConstructor,
   InputProps,
+  MarkdownProps,
   RenderElement,
   TextProps,
 } from 'claude-code'
@@ -18,13 +20,19 @@ import type {
   CockpitComando,
   CockpitContexto,
   CockpitEdicao,
+  CockpitFichaDoAgente,
+  CockpitFichaDoComando,
+  CockpitFichaDoTurno,
+  CockpitFoco,
   CockpitLimite,
   CockpitLinha,
   CockpitRodada,
   CockpitTurno,
   CockpitUi,
 } from '../types'
-import { custoDoUltimoTurno } from './dados'
+import { custoDoUltimoTurno, gruposDeTurnos } from './dados'
+import type { Grupo } from './dados'
+import { fichaDoAgente, fichaDoComando, fichaDoTurno } from './fichas'
 import {
   barra,
   curto,
@@ -46,6 +54,8 @@ export type Elementos = {
   Button: ElementConstructor<ButtonProps>
   // O mobile não tem Input: sem ele, a aba 4 fica sem o filtro.
   Input: ElementConstructor<InputProps> | null
+  Markdown: ElementConstructor<MarkdownProps>
+  Code: ElementConstructor<CodeProps>
 }
 
 export type Dados = {
@@ -56,6 +66,12 @@ export type Dados = {
   arquivos: readonly CockpitArquivo[]
   comandos: readonly CockpitComando[]
   rodadas: readonly CockpitRodada[]
+  // O detalhe do item em foco, quando há um aberto.
+  fichas: {
+    agente?: CockpitFichaDoAgente
+    comando?: CockpitFichaDoComando
+    turnos?: readonly CockpitFichaDoTurno[]
+  }
 }
 
 export type Quadro = {
@@ -70,6 +86,9 @@ export type Quadro = {
 
 export type Acoes = {
   aba: (aba: CockpitAba) => void
+  abrir: (foco: CockpitFoco) => void
+  voltar: () => void
+  mensagens: (agentId: string) => void
   passo: (delta: number) => void
   irAoPasso: (turno: number, passo: number) => void
   turno: (delta: number) => void
@@ -148,7 +167,10 @@ export const moverTurno = (
 export const temRelogio = (dados: Dados): boolean =>
   (dados.ui.aba === 1 && dados.agentes.some(agente => agente.estado === 'rodando')) ||
   (dados.ui.aba === 4 && dados.comandos.some(comando => comando.estado === 'rodando')) ||
-  (dados.ui.aba === 5 && dados.rodadas.some(rodada => rodada.duracaoMs === undefined))
+  (dados.ui.aba === 5 && dados.rodadas.some(rodada => rodada.duracaoMs === undefined)) ||
+  // O detalhe aberto de um agente ou de um turno ainda em curso.
+  (dados.ui.foco?.tipo === 'agente' &&
+    dados.agentes.some(agente => agente.id === dados.ui.foco?.id && agente.estado === 'rodando'))
 
 // A marca do painel: o selo "CSR" em azul e o nome ao lado.
 const marca = (el: Elementos, comNome: boolean): RenderElement => {
@@ -191,13 +213,34 @@ const abas = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): Render
   )
 }
 
+// O título de uma linha de lista, que abre o detalhe: um botão sem moldura
+// que fica sublinhado e azul enquanto o mouse está sobre a linha.
+const titulo = (el: Elementos, chave: string, texto: string, abrir: () => void): RenderElement => {
+  const { Button } = el
+
+  return (
+    <Button
+      key={chave}
+      label={`▸ ${texto}`}
+      plain
+      hover={{ underline: true, color: 'suggestion' }}
+      onPress={abrir}
+    />
+  )
+}
+
 const atividade = (agente: CockpitAgente): string =>
   agente.ferramenta === undefined
     ? 'iniciando'
     : `${agente.ferramenta} ${agente.argumento ?? ''}`.trim()
 
-const linhaDoAgente = (el: Elementos, agente: CockpitAgente, quadro: Quadro): RenderElement => {
-  const { Box, Text } = el
+const linhaDoAgente = (
+  el: Elementos,
+  agente: CockpitAgente,
+  quadro: Quadro,
+  acoes: Acoes,
+): RenderElement => {
+  const { Box, Button, Text } = el
   const isRodando = agente.estado === 'rodando'
   const isOk = agente.estado === 'concluido'
   const marca = isRodando ? '●' : isOk ? '✓' : '✗'
@@ -208,32 +251,43 @@ const linhaDoAgente = (el: Elementos, agente: CockpitAgente, quadro: Quadro): Re
       ? 'duração n/d'
       : duracao(agente.duracaoMs)
   const detalhe = isRodando ? atividade(agente) : (agente.resultado ?? 'sem texto de resultado')
-  const cabeca = (
-    <Text wrap="truncate-end">
-      <Text color={cor}>{`${marca} `}</Text>
-      <Text bold>{agente.tipo}</Text>
-      <Text dimColor>{` · ${agente.modelo ?? 'modelo n/d'} · ${tempo}`}</Text>
-      {!quadro.isCompacto && agente.chamadas > 0 && (
-        <Text dimColor>{` · ${plural(agente.chamadas, 'chamada', 'chamadas')}`}</Text>
-      )}
-      {quadro.isCompacto && <Text dimColor>{` · ${detalhe}`}</Text>}
-    </Text>
-  )
+  const numeros = [
+    agente.modelo ?? 'modelo n/d',
+    tempo,
+    agente.chamadas > 0 ? plural(agente.chamadas, 'chamada', 'chamadas') : undefined,
+    agente.tokens === undefined ? undefined : `${tokens(agente.tokens)} tokens`,
+  ].filter((parte): parte is string => parte !== undefined)
 
   if (quadro.isCompacto) {
-    return cabeca
+    return (
+      <Text wrap="truncate-end">
+        <Text color={cor}>{`${marca} `}</Text>
+        <Text bold>{agente.tipo}</Text>
+        <Text dimColor>{` · ${agente.modelo ?? 'modelo n/d'} · ${tempo} · ${detalhe}`}</Text>
+      </Text>
+    )
   }
 
+  const abrir = () => acoes.abrir({ tipo: 'agente', id: agente.id })
+
   return (
-    <Box flexDirection="column">
-      {cabeca}
+    <Box key={`linha-agente-${agente.id}`} flexDirection="column">
+      <Box flexDirection="row" columnGap={1}>
+        {titulo(el, `ver-agente-${agente.id}`, agente.tipo, abrir)}
+        <Box flexGrow={1} flexShrink={1} minWidth={0}>
+          <Text wrap="truncate-end">
+            <Text color={cor}>{marca}</Text>
+            <Text dimColor>{` ${numeros.join(' · ')}`}</Text>
+          </Text>
+        </Box>
+      </Box>
       {agente.descricao !== '' && <Text wrap="truncate-end">{`  ${agente.descricao}`}</Text>}
       <Text dimColor wrap="truncate-end">{`  ${detalhe}`}</Text>
     </Box>
   )
 }
 
-const abaAgentes = (el: Elementos, dados: Dados, quadro: Quadro): RenderElement => {
+const abaAgentes = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): RenderElement => {
   const { Box, Text } = el
   const rodando = dados.agentes.filter(agente => agente.estado === 'rodando')
   const prontos = dados.agentes.filter(agente => agente.estado !== 'rodando').reverse()
@@ -244,12 +298,12 @@ const abaAgentes = (el: Elementos, dados: Dados, quadro: Quadro): RenderElement 
       <Box flexDirection="column">
         <Text color="suggestion" bold>{`Rodando (${rodando.length})`}</Text>
         {rodando.length === 0 && <Text dimColor>Nenhum subagente rodando.</Text>}
-        {rodando.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro))}
+        {rodando.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro, acoes))}
       </Box>
       <Box flexDirection="column">
         <Text bold>{`Concluídos (${prontos.length})`}</Text>
         {prontos.length === 0 && <Text dimColor>Nenhum subagente concluído.</Text>}
-        {prontos.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro))}
+        {prontos.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro, acoes))}
       </Box>
     </Box>
   )
@@ -570,8 +624,13 @@ const abaContexto = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
   )
 }
 
-const linhaDoComando = (el: Elementos, comando: CockpitComando, quadro: Quadro): RenderElement => {
-  const { Text } = el
+const linhaDoComando = (
+  el: Elementos,
+  comando: CockpitComando,
+  quadro: Quadro,
+  acoes: Acoes,
+): RenderElement => {
+  const { Box, Text } = el
   const isVivo = comando.estado === 'rodando' || comando.estado === 'fundo'
   const isOk = comando.estado === 'ok'
   const marca = isVivo ? '●' : isOk ? '✓' : '✗'
@@ -592,12 +651,30 @@ const linhaDoComando = (el: Elementos, comando: CockpitComando, quadro: Quadro):
     comando.quem === 'principal' ? undefined : comando.quem,
   ].filter((parte): parte is string => parte !== undefined)
 
+  const texto = curto(umaLinha(comando.comando), Math.max(20, quadro.largura - 34))
+
+  if (quadro.isCompacto) {
+    return (
+      <Text wrap="truncate-end">
+        <Text color={cor}>{`${marca} `}</Text>
+        <Text>{texto}</Text>
+        <Text dimColor>{` · ${partes.join(' · ')}`}</Text>
+      </Text>
+    )
+  }
+
+  const abrir = () => acoes.abrir({ tipo: 'comando', id: comando.id })
+
   return (
-    <Text wrap="truncate-end">
-      <Text color={cor}>{`${marca} `}</Text>
-      <Text>{curto(umaLinha(comando.comando), Math.max(20, quadro.largura - 30))}</Text>
-      <Text dimColor>{` · ${partes.join(' · ')}`}</Text>
-    </Text>
+    <Box key={`linha-comando-${comando.id}`} flexDirection="row" columnGap={1}>
+      {titulo(el, `ver-comando-${comando.id}`, texto, abrir)}
+      <Box flexGrow={1} flexShrink={1} minWidth={0}>
+        <Text wrap="truncate-end">
+          <Text color={cor}>{marca}</Text>
+          {partes.length > 0 && <Text dimColor>{` ${partes.join(' · ')}`}</Text>}
+        </Text>
+      </Box>
+    </Box>
   )
 }
 
@@ -636,70 +713,117 @@ const abaArquivos = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
       <Box flexDirection="column">
         <Text bold>{`Comandos Bash (${comandos.length})`}</Text>
         {comandos.length === 0 && <Text dimColor>Nenhum comando Bash.</Text>}
-        {comandos.slice(0, maximo).map(comando => linhaDoComando(el, comando, quadro))}
+        {comandos.slice(0, maximo).map(comando => linhaDoComando(el, comando, quadro, acoes))}
       </Box>
     </Box>
   )
 }
 
-const linhaDaRodada = (
+const linhaDoGrupo = (
   el: Elementos,
-  rodada: CockpitRodada,
+  grupo: Grupo,
   edicoes: number,
   quadro: Quadro,
+  acoes: Acoes,
 ): RenderElement => {
   const { Box, Text } = el
-  const isAndando = rodada.duracaoMs === undefined
-  const tempo = isAndando ? duracao(quadro.agora - rodada.inicio) : duracao(rodada.duracaoMs ?? 0)
+  const tempo = grupo.isAndando ? duracao(quadro.agora - grupo.inicio) : duracao(grupo.duracaoMs)
+  const pedido = grupo.cabeca?.pedido ?? ''
   const partes = [
-    rodada.variacao === undefined
+    grupo.variacao === undefined
       ? undefined
-      : `${rodada.variacao >= 0 ? '+' : '−'}${tokens(rodada.variacao)} de contexto`,
-    rodada.custo === undefined ? undefined : dolar(rodada.custo),
-    plural(rodada.ferramentas, 'ferramenta', 'ferramentas'),
+      : `${grupo.variacao >= 0 ? '+' : '−'}${tokens(grupo.variacao)} de contexto`,
+    grupo.custo === undefined ? undefined : dolar(grupo.custo),
+    plural(grupo.ferramentas, 'ferramenta', 'ferramentas'),
     edicoes > 0 ? plural(edicoes, 'edição', 'edições') : undefined,
+    grupo.retornos.length > 0
+      ? plural(grupo.retornos.length, 'retorno de agente', 'retornos de agentes')
+      : undefined,
   ].filter((parte): parte is string => parte !== undefined)
+  const estado = (
+    <Text wrap="truncate-end">
+      {grupo.isAndando && <Text color="suggestion">{`em andamento · ${tempo}`}</Text>}
+      {!grupo.isAndando && <Text dimColor>{tempo}</Text>}
+      {grupo.isAbortado && <Text color="error">{' · interrompido'}</Text>}
+      {grupo.falhas > 0 && (
+        <Text color="error">{` · ${plural(grupo.falhas, 'falha', 'falhas')}`}</Text>
+      )}
+    </Text>
+  )
+
+  if (quadro.isCompacto) {
+    return (
+      <Box flexDirection="column">
+        <Text wrap="truncate-end">
+          <Text bold>{`Turno ${grupo.ordem} · `}</Text>
+          {estado}
+        </Text>
+        <Text dimColor wrap="truncate-end">{partes.join(' · ')}</Text>
+      </Box>
+    )
+  }
+
+  const abrir = () => acoes.abrir({ tipo: 'turno', id: String(grupo.ordem) })
 
   return (
-    <Box flexDirection="column">
-      <Text wrap="truncate-end">
-        <Text bold>{`Turno ${rodada.n}`}</Text>
-        {isAndando && <Text color="suggestion">{` · em andamento · ${tempo}`}</Text>}
-        {!isAndando && <Text dimColor>{` · ${tempo}`}</Text>}
-        {rodada.isAbortado === true && <Text color="error">{' · interrompido'}</Text>}
-        {rodada.falhas > 0 && (
-          <Text color="error">{` · ${plural(rodada.falhas, 'falha', 'falhas')}`}</Text>
-        )}
-      </Text>
-      {!quadro.isCompacto && rodada.pedido !== '' && (
-        <Text wrap="truncate-end">{`  ${rodada.pedido}`}</Text>
-      )}
+    <Box key={`linha-turno-${grupo.ordem}`} flexDirection="column">
+      <Box flexDirection="row" columnGap={1}>
+        {titulo(el, `ver-turno-${grupo.ordem}`, `Turno ${grupo.ordem}`, abrir)}
+        <Box flexGrow={1} flexShrink={1} minWidth={0}>
+          {estado}
+        </Box>
+      </Box>
+      {pedido !== '' && <Text wrap="truncate-end">{`  ${pedido}`}</Text>}
       <Text dimColor wrap="truncate-end">{`  ${partes.join(' · ')}`}</Text>
     </Box>
   )
 }
 
-const abaTurnos = (el: Elementos, dados: Dados, quadro: Quadro): RenderElement => {
+const abaTurnos = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): RenderElement => {
   const { Box, Text } = el
-  const lista = [...dados.rodadas].reverse()
+  const grupos = gruposDeTurnos(dados.rodadas)
   const maximo = quadro.isCompacto ? 2 : 30
-  const edicoesDe = (n: number): number =>
-    dados.turnos.find(turno => turno.n === n)?.edicoes.length ?? 0
+  const edicoesDe = (ordem: number): number =>
+    dados.turnos.find(turno => turno.n === ordem)?.edicoes.length ?? 0
 
   return (
     <Box key="turnos" flexDirection="column" rowGap={respiro(quadro)}>
       <Box flexDirection="column">
-        <Text bold>{`Turnos (${lista.length})`}</Text>
-        {lista.length === 0 && <Text dimColor>Nenhum turno nesta sessão ainda.</Text>}
+        <Text bold>{`Turnos (${grupos.length})`}</Text>
+        {grupos.length === 0 && <Text dimColor>Nenhum turno nesta sessão ainda.</Text>}
       </Box>
-      {lista.slice(0, maximo).map(rodada => linhaDaRodada(el, rodada, edicoesDe(rodada.n), quadro))}
+      {grupos
+        .slice(0, maximo)
+        .map(grupo => linhaDoGrupo(el, grupo, edicoesDe(grupo.ordem), quadro, acoes))}
     </Box>
   )
 }
 
 const corpo = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): RenderElement => {
+  const foco = dados.ui.foco
+
+  // Um item aberto em detalhe toma o lugar da lista da aba dele.
+  if (foco?.tipo === 'agente' && dados.ui.aba === 1) {
+    const agente = dados.agentes.find(um => um.id === foco.id)
+
+    return fichaDoAgente(el, agente, dados.fichas.agente, quadro, acoes)
+  }
+
+  if (foco?.tipo === 'comando' && dados.ui.aba === 4) {
+    const comando = dados.comandos.find(um => um.id === foco.id)
+
+    return fichaDoComando(el, comando, dados.fichas.comando, quadro, acoes)
+  }
+
+  if (foco?.tipo === 'turno' && dados.ui.aba === 5) {
+    const grupo = gruposDeTurnos(dados.rodadas).find(um => String(um.ordem) === foco.id)
+    const edicoes = dados.turnos.find(turno => String(turno.n) === foco.id)?.edicoes.length ?? 0
+
+    return fichaDoTurno(el, grupo, dados.fichas.turnos ?? [], dados.agentes, edicoes, quadro, acoes)
+  }
+
   if (dados.ui.aba === 1) {
-    return abaAgentes(el, dados, quadro)
+    return abaAgentes(el, dados, quadro, acoes)
   }
 
   if (dados.ui.aba === 2) {
@@ -710,7 +834,30 @@ const corpo = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): Rende
     return abaContexto(el, dados, quadro, acoes)
   }
 
-  return dados.ui.aba === 4 ? abaArquivos(el, dados, quadro, acoes) : abaTurnos(el, dados, quadro)
+  return dados.ui.aba === 4
+    ? abaArquivos(el, dados, quadro, acoes)
+    : abaTurnos(el, dados, quadro, acoes)
+}
+
+// O resumo da sessão numa linha, na faixa acima do prompt, em azul: o que
+// antes era a status line do Claude Code. `abaixo` é o que já estava na faixa.
+export const linhaDeResumo = (
+  el: Pick<Elementos, 'Box' | 'Text'>,
+  resumo: string,
+  abaixo: RenderElement,
+): RenderElement => {
+  const { Box, Text } = el
+
+  return (
+    <Box flexDirection="column">
+      {abaixo}
+      <Text wrap="truncate-end">
+        <Text color="suggestion" bold inverse>{' CSR '}</Text>
+        <Text bold>{' Cockpit'}</Text>
+        <Text color="suggestion">{`  ${resumo}`}</Text>
+      </Text>
+    </Box>
+  )
 }
 
 export const desenhar = (

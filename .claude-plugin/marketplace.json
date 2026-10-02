@@ -11,7 +11,7 @@
     {
       "name": "csr-cockpit",
       "source": "./plugins/csr-cockpit",
-      "description": "Mod: painel ao lado da conversa com agentes, diffs, contexto, arquivos, comandos e turnos, e uma status line. Só observa.",
+      "description": "Mod: painel ao lado da conversa com agentes, diffs, contexto, arquivos, comandos e turnos, e uma linha de resumo acima do prompt. Só observa.",
       "category": "mod"
     },
     {

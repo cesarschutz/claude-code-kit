@@ -9,7 +9,9 @@ import type {
   CockpitComando,
   CockpitContexto,
   CockpitEdicao,
+  CockpitFichaDoAgente,
   CockpitLimite,
+  CockpitPasso,
   CockpitPonto,
   CockpitRodada,
   CockpitTurno,
@@ -32,7 +34,11 @@ const MAX_COMANDOS = 100
 const MAX_TURNOS = 10
 const MAX_EDICOES = 60
 const MAX_PONTOS = 12
-const MAX_RODADAS = 30
+const MAX_RODADAS = 60
+const MAX_PASSOS = 40
+
+export const FICHAS_DE_COMANDO = 100
+export const FICHAS_DE_TURNO = 60
 
 export const UI_INICIAL: CockpitUi = {
   aba: 1,
@@ -128,7 +134,14 @@ export const comAgente = (
 
 export const comFimDoAgente = (
   lista: readonly CockpitAgente[],
-  fim: { id: string; isOk: boolean; duracaoMs: number; resposta: string; motivo: string },
+  fim: {
+    id: string
+    isOk: boolean
+    duracaoMs: number
+    resposta: string
+    motivo: string
+    tokens: number | undefined
+  },
   agora: number,
 ): CockpitAgente[] => {
   const resultado = curto(primeiraLinha(fim.resposta), 200) || (fim.isOk ? '' : `terminou por ${fim.motivo}`)
@@ -136,6 +149,7 @@ export const comFimDoAgente = (
     estado: fim.isOk ? ('concluido' as const) : ('falhou' as const),
     duracaoMs: fim.duracaoMs,
     ...(resultado === '' ? {} : { resultado }),
+    ...(fim.tokens === undefined ? {} : { tokens: fim.tokens }),
   }
 
   if (!lista.some(agente => agente.id === fim.id)) {
@@ -344,7 +358,7 @@ export const custoDoUltimoTurno = (contexto: CockpitContexto): number | undefine
     ? undefined
     : Math.max(0, contexto.custo - contexto.custoAntes)
 
-// A status line: só o que já tem leitura, cada parte com o seu nome. Sem
+// A linha de resumo: só o que já tem leitura, cada parte com o seu nome. Sem
 // nada para dizer (sessão recém-aberta), não há linha.
 export const textoDoStatus = (
   agentes: readonly CockpitAgente[],
@@ -382,14 +396,95 @@ export const textoDoStatus = (
 
 export const comRodada = (
   lista: readonly CockpitRodada[],
-  n: number,
-  pedido: string,
-  agora: number,
-): CockpitRodada[] =>
-  [
-    ...lista.filter(rodada => rodada.n !== n),
-    { n, pedido, inicio: agora, ferramentas: 0, falhas: 0 },
-  ].slice(-MAX_RODADAS)
+  nova: CockpitRodada,
+): CockpitRodada[] => [...lista.filter(rodada => rodada.n !== nova.n), nova].slice(-MAX_RODADAS)
+
+// Um turno que o Claude Code abre sozinho quando um agente em segundo plano
+// devolve o resultado: o texto vem embrulhado e traz o id do agente.
+export const retornoDe = (
+  texto: string,
+): { agenteId: string | undefined; relato: string | undefined } | undefined => {
+  const inicio = texto.trimStart()
+
+  if (inicio.startsWith('<task-notification')) {
+    return {
+      agenteId: /<task-id>([^<]+)<\/task-id>/.exec(inicio)?.[1],
+      relato: /<result>([\s\S]*?)<\/result>/.exec(inicio)?.[1]?.trim(),
+    }
+  }
+
+  if (inicio.startsWith('<agent-message')) {
+    const relato = inicio
+      .replace(/^<agent-message[^>]*>/, '')
+      .replace(/<\/agent-message>\s*$/, '')
+      .trim()
+
+    return {
+      agenteId: /^<agent-message[^>]*\bfrom="([^"]+)"/.exec(inicio)?.[1],
+      relato: relato === '' ? undefined : relato,
+    }
+  }
+
+  return undefined
+}
+
+// Os turnos agrupados pelo pedido da pessoa: o turno que ela abriu e os
+// retornos dos agentes dele, com os números somados. O mais recente primeiro.
+export type Grupo = {
+  ordem: number
+  cabeca: CockpitRodada | undefined
+  retornos: CockpitRodada[]
+  inicio: number
+  isAndando: boolean
+  isAbortado: boolean
+  duracaoMs: number
+  variacao: number | undefined
+  custo: number | undefined
+  ferramentas: number
+  falhas: number
+  porFerramenta: Record<string, number>
+}
+
+export const gruposDeTurnos = (rodadas: readonly CockpitRodada[]): Grupo[] => {
+  const grupos = new Map<number, CockpitRodada[]>()
+
+  for (const rodada of rodadas) {
+    const ordem = rodada.ordem ?? rodada.n
+    grupos.set(ordem, [...(grupos.get(ordem) ?? []), rodada])
+  }
+
+  return [...grupos.entries()]
+    .map(([ordem, membros]): Grupo => {
+      const somar = (ler: (rodada: CockpitRodada) => number | undefined): number | undefined => {
+        const valores = membros.map(ler).filter((valor): valor is number => valor !== undefined)
+
+        return valores.length === 0 ? undefined : valores.reduce((a, b) => a + b, 0)
+      }
+      const porFerramenta: Record<string, number> = {}
+
+      for (const rodada of membros) {
+        for (const [nome, vezes] of Object.entries(rodada.porFerramenta ?? {})) {
+          porFerramenta[nome] = (porFerramenta[nome] ?? 0) + vezes
+        }
+      }
+
+      return {
+        ordem,
+        cabeca: membros.find(rodada => rodada.isRetorno !== true),
+        retornos: membros.filter(rodada => rodada.isRetorno === true),
+        inicio: Math.min(...membros.map(rodada => rodada.inicio)),
+        isAndando: membros.some(rodada => rodada.duracaoMs === undefined),
+        isAbortado: membros.some(rodada => rodada.isAbortado === true),
+        duracaoMs: somar(rodada => rodada.duracaoMs) ?? 0,
+        variacao: somar(rodada => rodada.variacao),
+        custo: somar(rodada => rodada.custo),
+        ferramentas: somar(rodada => rodada.ferramentas) ?? 0,
+        falhas: somar(rodada => rodada.falhas) ?? 0,
+        porFerramenta,
+      }
+    })
+    .sort((a, b) => b.ordem - a.ordem)
+}
 
 const naRodada = (
   lista: readonly CockpitRodada[],
@@ -400,13 +495,54 @@ const naRodada = (
 export const comChamadaNaRodada = (
   lista: readonly CockpitRodada[],
   n: number,
+  ferramenta: string,
   isFalha: boolean,
 ): CockpitRodada[] =>
   naRodada(lista, n, rodada => ({
     ...rodada,
     ferramentas: rodada.ferramentas + 1,
     falhas: rodada.falhas + (isFalha ? 1 : 0),
+    porFerramenta: {
+      ...rodada.porFerramenta,
+      [ferramenta]: (rodada.porFerramenta?.[ferramenta] ?? 0) + 1,
+    },
   }))
+
+const FICHA_VAZIA: CockpitFichaDoAgente = { pedido: '', passos: [] }
+
+// Uma chamada do subagente entra na ficha dele (as últimas 40).
+export const comPasso = (
+  ficha: CockpitFichaDoAgente | undefined,
+  passo: CockpitPasso,
+): CockpitFichaDoAgente => {
+  const atual = ficha ?? FICHA_VAZIA
+
+  return {
+    ...atual,
+    passos: [...atual.passos.filter(um => um.id !== passo.id), passo].slice(-MAX_PASSOS),
+  }
+}
+
+export const comFimDoPasso = (
+  ficha: CockpitFichaDoAgente | undefined,
+  id: string,
+  isOk: boolean,
+  duracaoMs: number,
+): CockpitFichaDoAgente => {
+  const atual = ficha ?? FICHA_VAZIA
+
+  return {
+    ...atual,
+    passos: atual.passos.map(passo =>
+      passo.id === id ? { ...passo, estado: isOk ? 'ok' : 'falhou', duracaoMs } : passo,
+    ),
+  }
+}
+
+export const naFicha = (
+  ficha: CockpitFichaDoAgente | undefined,
+  muda: Partial<CockpitFichaDoAgente>,
+): CockpitFichaDoAgente => ({ ...(ficha ?? FICHA_VAZIA), ...muda })
 
 export const comFimDaRodada = (
   lista: readonly CockpitRodada[],

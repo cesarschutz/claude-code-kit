@@ -1,5 +1,5 @@
-// csr-cockpit: um painel ao lado da conversa, com cinco abas e uma status
-// line. O mod só observa: todo hook de evento chama next(e) com o mesmo `e`
+// csr-cockpit: um painel ao lado da conversa, com cinco abas, e uma linha de
+// resumo acima do prompt. O mod só observa: todo hook de evento chama next(e) com o mesmo `e`
 // e devolve o que next devolveu. O que ele registra fica em $.state.
 
 import { atom, read, update } from 'claude-code'
@@ -20,9 +20,17 @@ import type {
   CockpitComando,
   CockpitDetalhe,
   CockpitEdicao,
+  CockpitFichaDoComando,
+  CockpitFichaDoTurno,
+  CockpitFoco,
+  CockpitPasso,
+  CockpitRodada,
+  CockpitTokens,
 } from '../types'
 import {
   CONTEXTO_INICIAL,
+  FICHAS_DE_COMANDO,
+  FICHAS_DE_TURNO,
   UI_INICIAL,
   comAgente,
   comAtividade,
@@ -32,18 +40,22 @@ import {
   comFimDaRodada,
   comFimDoAgente,
   comFimDoComando,
+  comFimDoPasso,
   comInicioDoTurno,
   comLeitura,
   comListaDaSessao,
   comMedida,
   comMedidaNaRodada,
+  comPasso,
   comRodada,
+  naFicha,
+  retornoDe,
   resumoDaChamada,
   textoDoStatus,
 } from './dados'
 import { compararTextos, deRemendos, lerRemendos } from './diff'
-import { curto, umaLinha } from './formato'
-import { desenhar, moverPasso, moverTurno, temRelogio } from './telas'
+import { cabeca, cauda, curto, limpo, umaLinha } from './formato'
+import { desenhar, linhaDeResumo, moverPasso, moverTurno, temRelogio } from './telas'
 import type { Acoes, Dados, Elementos, Quadro } from './telas'
 
 const PAINEL = 'csr-cockpit'
@@ -57,6 +69,17 @@ const arquivos = atom({ plugin: 'csr-cockpit', key: 'arquivos' } as const, [])
 const comandos = atom({ plugin: 'csr-cockpit', key: 'comandos' } as const, [])
 const turno = atom({ plugin: 'csr-cockpit', key: 'turno' } as const, 0)
 const rodadas = atom({ plugin: 'csr-cockpit', key: 'rodadas' } as const, [])
+const serie = atom({ plugin: 'csr-cockpit', key: 'serie' } as const, 0)
+// Quantos pedidos a pessoa fez: o número que as abas mostram como "Turno N".
+const pedidos = atom({ plugin: 'csr-cockpit', key: 'pedidos' } as const, 0)
+
+// Os detalhes abertos sob demanda, um membro por item: assim as listas que
+// mudam a cada chamada continuam pequenas.
+const fichasDeAgentes = { plugin: 'csr-cockpit', key: 'fichasDeAgentes' } as const
+const fichasDeComandos = { plugin: 'csr-cockpit', key: 'fichasDeComandos' } as const
+const fichasDeTurnos = { plugin: 'csr-cockpit', key: 'fichasDeTurnos' } as const
+
+const fichaDoTurno = (n: number): string => `t${n % FICHAS_DE_TURNO}`
 
 type Chamada = Frozen<ToolCallInput>
 
@@ -69,8 +92,6 @@ const comoTexto = (valor: unknown): string => (typeof valor === 'string' ? valor
 
 // Do módulo, refeitos a cada recarga: nada que precise sobreviver a ela.
 let raiz = ''
-let ultimoStatus: string | undefined
-let temStatus = false
 let isRelogioLigado = false
 
 // O registro nunca derruba o hook: uma falha vai para o log de depuração.
@@ -79,21 +100,6 @@ const anotar = async ($: EngineInterface, onde: string, trabalho: () => Promise<
     await trabalho()
   } catch (erro) {
     $.ui.log(`csr-cockpit: ${onde}: ${String(erro)}`, { to: 'debug' })
-  }
-}
-
-const publicarStatus = async ($: EngineInterface) => {
-  const texto = textoDoStatus(await read($, agentes), await read($, contexto))
-
-  // Sem nada para dizer e sem linha no ar, não há o que publicar.
-  if (texto === undefined && !temStatus) {
-    return
-  }
-
-  if (texto !== ultimoStatus) {
-    ultimoStatus = texto
-    temStatus = texto !== undefined
-    $.ui.status(texto)
   }
 }
 
@@ -128,7 +134,7 @@ const detalharContexto = async (
     return false
   }
 
-  const n = await read($, turno)
+  const n = await read($, pedidos)
   const detalhe: CockpitDetalhe = {
     categorias: medido.categories.map(
       (categoria): CockpitCategoria => ({
@@ -181,18 +187,36 @@ const aoIniciar = async ($: EngineInterface, e: Chamada) => {
 
   if (agentId !== undefined) {
     const argumento = resumoDaChamada(campos(e), raiz)
+    const passo: CockpitPasso = {
+      id: e.tool_use_id,
+      ferramenta: e.tool,
+      argumento,
+      estado: 'rodando',
+    }
     await update($, agentes, lista => comAtividade(lista, agentId, e.tool, argumento, agora))
-    await publicarStatus($)
+    await update($, { ...fichasDeAgentes, id: agentId }, ficha => comPasso(ficha, passo))
   }
 
   if (e.tool === 'Bash') {
+    const entrada = campos(e)
+    const inteiro = limpo(comoTexto(entrada.command))
+    const descricao = limpo(comoTexto(entrada.description))
+    // As fichas dos comandos giram em 100 lugares, como a lista.
+    const lugar = `c${(await update($, serie, atual => atual + 1)) % FICHAS_DE_COMANDO}`
+    const ficha: CockpitFichaDoComando = {
+      id: e.tool_use_id,
+      comando: cabeca(inteiro, 4000),
+      ...(descricao === '' ? {} : { descricao: curto(umaLinha(descricao), 200) }),
+    }
     const comando: CockpitComando = {
       id: e.tool_use_id,
-      comando: curto(umaLinha(comoTexto(campos(e).command)), 400),
+      comando: curto(umaLinha(inteiro), 400),
       estado: 'rodando',
       inicio: agora,
       quem: await autor($, agentId),
+      ficha: lugar,
     }
+    await update($, { ...fichasDeComandos, id: lugar }, () => ficha)
     await update($, comandos, lista => comComando(lista, comando))
   }
 }
@@ -291,10 +315,36 @@ const aoTerminar = async (
   antes: string | null | undefined,
 ) => {
   const isOk = saida.deny === undefined && saida.isError !== true
+  const agentId = e.agentId
+
+  if (agentId !== undefined) {
+    await update($, { ...fichasDeAgentes, id: agentId }, ficha =>
+      comFimDoPasso(ficha, e.tool_use_id, isOk, duracaoMs),
+    )
+  }
 
   if (e.tool === 'Bash') {
     const fim = fimDoBash(saida, duracaoMs)
-    await update($, comandos, lista => comFimDoComando(lista, e.tool_use_id, fim))
+    const lista = await update($, comandos, atual => comFimDoComando(atual, e.tool_use_id, fim))
+    const lugar = lista.find(comando => comando.id === e.tool_use_id)?.ficha
+
+    if (lugar !== undefined) {
+      const resultado = campos(saida.result)
+      const fora = limpo(comoTexto(resultado.stdout)).trimEnd()
+      const erro = limpo(
+        isOk ? comoTexto(resultado.stderr) : (saida.deny ?? saida.text ?? comoTexto(saida.result)),
+      ).trimEnd()
+      await update($, { ...fichasDeComandos, id: lugar }, ficha =>
+        // O lugar pode já ter girado para outro comando.
+        ficha === undefined || ficha.id !== e.tool_use_id
+          ? (ficha ?? { id: e.tool_use_id, comando: '' })
+          : {
+              ...ficha,
+              ...(fora === '' ? {} : { saida: cauda(fora, 3000) }),
+              ...(erro === '' ? {} : { erro: cauda(erro, 3000) }),
+            },
+      )
+    }
 
     return
   }
@@ -315,7 +365,7 @@ const aoTerminar = async (
     const edicao = edicaoDe(e, saida, antes)
 
     if (edicao !== undefined) {
-      const n = Math.max(1, await read($, turno))
+      const n = Math.max(1, await read($, pedidos))
       await update($, turnos, lista => comEdicao(lista, n, edicao))
     }
   }
@@ -331,8 +381,45 @@ const lerAntes = async ($: EngineInterface, caminho: string): Promise<string | n
   }
 }
 
+// As últimas mensagens que um subagente escreveu, lidas da transcrição dele.
+const lerMensagens = async ($: EngineInterface, agentId: string) => {
+  const lidas = await $.session.messages({ agentId })
+
+  // A sessão não lê a transcrição desse agente.
+  if (!Array.isArray(lidas)) {
+    return
+  }
+
+  const mensagens = lidas
+    .filter(mensagem => mensagem.role === 'assistant' && mensagem.text.trim() !== '')
+    .slice(-8)
+    .map(mensagem => cabeca(limpo(mensagem.text).trim(), 1500))
+  await update($, { ...fichasDeAgentes, id: agentId }, ficha => naFicha(ficha, { mensagens }))
+}
+
 const acoes = ($: EngineInterface): Acoes => ({
-  aba: (aba: CockpitAba) => void update($, ui, atual => ({ ...atual, aba })),
+  // Trocar de aba fecha o detalhe aberto.
+  aba: (aba: CockpitAba) =>
+    void update($, ui, atual => {
+      const { foco: _foco, ...resto } = atual
+
+      return { ...resto, aba }
+    }),
+  abrir: (foco: CockpitFoco) =>
+    void anotar($, 'abrir detalhe', async () => {
+      await update($, ui, atual => ({ ...atual, foco }))
+
+      if (foco.tipo === 'agente') {
+        await lerMensagens($, foco.id)
+      }
+    }),
+  voltar: () =>
+    void update($, ui, atual => {
+      const { foco: _foco, ...resto } = atual
+
+      return resto
+    }),
+  mensagens: (agentId: string) => void anotar($, 'mensagens do agente', () => lerMensagens($, agentId)),
   passo: delta =>
     void anotar($, 'passo', async () => {
       const lista = await read($, turnos)
@@ -361,15 +448,57 @@ const acoes = ($: EngineInterface): Acoes => ({
   fechar: () => void update($, ui, atual => ({ ...atual, isFaixa: false })),
 })
 
-const lerDados = async ($: EngineInterface): Promise<Dados> => ({
-  ui: await read($, ui),
-  agentes: await read($, agentes),
-  turnos: await read($, turnos),
-  contexto: await read($, contexto),
-  arquivos: await read($, arquivos),
-  comandos: await read($, comandos),
-  rodadas: await read($, rodadas),
-})
+const lerDados = async ($: EngineInterface): Promise<Dados> => {
+  const visao = await read($, ui)
+  const lista = await read($, comandos)
+  const foco = visao.foco
+  const dados: Dados = {
+    ui: visao,
+    agentes: await read($, agentes),
+    turnos: await read($, turnos),
+    contexto: await read($, contexto),
+    arquivos: await read($, arquivos),
+    comandos: lista,
+    rodadas: await read($, rodadas),
+    fichas: {},
+  }
+
+  if (foco?.tipo === 'agente') {
+    const ficha = await read($, { ...fichasDeAgentes, id: foco.id })
+
+    return ficha === undefined ? dados : { ...dados, fichas: { agente: ficha } }
+  }
+
+  if (foco?.tipo === 'comando') {
+    const lugar = lista.find(comando => comando.id === foco.id)?.ficha
+    const ficha =
+      lugar === undefined ? undefined : await read($, { ...fichasDeComandos, id: lugar })
+
+    return ficha === undefined || ficha.id !== foco.id
+      ? dados
+      : { ...dados, fichas: { comando: ficha } }
+  }
+
+  if (foco?.tipo === 'turno') {
+    // O grupo do pedido: o turno da pessoa e os retornos dos agentes (até 12).
+    const membros = dados.rodadas
+      .filter(rodada => String(rodada.ordem ?? rodada.n) === foco.id)
+      .slice(0, 12)
+    const fichas: CockpitFichaDoTurno[] = []
+
+    for (const rodada of membros) {
+      const ficha = await read($, { ...fichasDeTurnos, id: fichaDoTurno(rodada.n) })
+
+      if (ficha !== undefined && ficha.n === rodada.n) {
+        fichas.push(ficha)
+      }
+    }
+
+    return { ...dados, fichas: { turnos: fichas } }
+  }
+
+  return dados
+}
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
@@ -387,7 +516,6 @@ export const register: Register = on => {
     await anotar($, 'agentes da sessão', () => acertarAgentes($))
     await anotar($, 'medição inicial', () => medir($))
     await anotar($, 'estimativa inicial', () => detalharContexto($, 'summary'))
-    await anotar($, 'status', () => publicarStatus($))
 
     // Um tique por segundo, só enquanto a aba em vista mostra tempo decorrido.
     $.clock.every(1000, () => {
@@ -405,19 +533,21 @@ export const register: Register = on => {
     if (isAberto) {
       await $.ui.close({ id: PAINEL })
 
-      return { text: 'Cockpit fechado.' }
+      return {}
     }
 
     if ((await read($, ui)).isFaixa) {
       await update($, ui, atual => ({ ...atual, isFaixa: false }))
 
-      return { text: 'Cockpit fechado.' }
+      return {}
     }
 
     const aberto = await $.ui.open({ id: PAINEL, title: TITULO, focus: true, closeOnEscape: true })
 
+    // Sem texto de saída: o painel aberto já é a resposta, e o texto de um
+    // comando entra na conversa que o modelo lê.
     if (aberto.isPlaced) {
-      return { text: 'Cockpit aberto. 1 a 5 trocam de aba, Esc fecha.' }
+      return {}
     }
 
     // Sem lugar para o painel: ele sai e a versão compacta sobe para a faixa.
@@ -451,7 +581,7 @@ export const register: Register = on => {
       await anotar($, 'tool.call (turno)', async () => {
         const n = await read($, turno)
         const isFalha = saida.deny !== undefined || saida.isError === true
-        await update($, rodadas, lista => comChamadaNaRodada(lista, n, isFalha))
+        await update($, rodadas, lista => comChamadaNaRodada(lista, n, e.tool, isFalha))
       })
 
       return saida
@@ -485,8 +615,9 @@ export const register: Register = on => {
 
       const agora = await $.clock.now()
       const novo = { id, tipo: e.subagentType, descricao: e.description, modelo: iniciado.model }
+      const pedido = cabeca(limpo(e.prompt), 4000)
       await update($, agentes, lista => comAgente(lista, novo, agora))
-      await publicarStatus($)
+      await update($, { ...fichasDeAgentes, id }, ficha => naFicha(ficha, { pedido }))
     })
 
     return iniciado
@@ -499,8 +630,35 @@ export const register: Register = on => {
     await anotar($, 'turn.start', async () => {
       const n = await update($, turno, atual => atual + 1)
       const agora = await $.clock.now()
-      const pedido = curto(umaLinha(e.text), 80)
-      await update($, rodadas, lista => comRodada(lista, n, pedido, agora))
+      const retorno = retornoDe(e.text)
+      // O retorno de um agente em segundo plano continua o pedido corrente.
+      const ordem =
+        retorno === undefined
+          ? await update($, pedidos, atual => atual + 1)
+          : Math.max(1, await read($, pedidos))
+      const agenteId = retorno?.agenteId
+      const relato = retorno?.relato
+      const rodada: CockpitRodada = {
+        n,
+        ordem,
+        pedido: retorno === undefined ? curto(umaLinha(e.text), 80) : '',
+        inicio: agora,
+        ferramentas: 0,
+        falhas: 0,
+        ...(retorno === undefined ? {} : { isRetorno: true }),
+        ...(agenteId === undefined ? {} : { agenteId }),
+      }
+      const inteiro = retorno === undefined ? cabeca(limpo(e.text), 6000) : ''
+      await update($, rodadas, lista => comRodada(lista, rodada))
+      await update($, { ...fichasDeTurnos, id: fichaDoTurno(n) }, () => ({ n, pedido: inteiro }))
+
+      // O que o agente devolveu ao loop principal, quando ele não deixou resposta.
+      if (agenteId !== undefined && relato !== undefined) {
+        const entregue = cabeca(limpo(relato), 6000)
+        await update($, { ...fichasDeAgentes, id: agenteId }, ficha =>
+          ficha?.resposta === undefined ? naFicha(ficha, { resposta: entregue }) : ficha,
+        )
+      }
       await anotar($, 'medição do início do turno', () => medir($))
       await update($, contexto, comInicioDoTurno)
     })
@@ -519,21 +677,46 @@ export const register: Register = on => {
         // Fim de um turno do loop principal: fecha o turno na aba Turnos e
         // acerta os agentes que morreram sem avisar.
         const n = await read($, turno)
+        const resposta = cabeca(limpo(e.answer), 8000)
         await update($, rodadas, lista => comFimDaRodada(lista, n, e.durationMs, e.isAborted))
+        await update($, { ...fichasDeTurnos, id: fichaDoTurno(n) }, ficha =>
+          ficha === undefined || ficha.n !== n ? { n, pedido: '', resposta } : { ...ficha, resposta },
+        )
         await acertarAgentes($)
       } else {
         const agora = await $.clock.now()
+        const uso = e.usage
+        const tokens: CockpitTokens | undefined =
+          uso === undefined
+            ? undefined
+            : {
+                entrada: uso.input_tokens,
+                saida: uso.output_tokens,
+                cacheLido: uso.cache_read_input_tokens,
+                cacheGravado: uso.cache_creation_input_tokens,
+                modelo: uso.model,
+              }
         const fim = {
           id,
           isOk: e.reason === 'answer',
           duracaoMs: e.durationMs,
           resposta: e.answer,
           motivo: e.reason,
+          tokens:
+            tokens === undefined
+              ? undefined
+              : tokens.entrada + tokens.saida + tokens.cacheLido + tokens.cacheGravado,
         }
+        const resposta = cabeca(limpo(e.answer), 6000)
         await update($, agentes, lista => comFimDoAgente(lista, fim, agora))
+        await update($, { ...fichasDeAgentes, id }, ficha =>
+          naFicha(ficha, {
+            ...(resposta === '' ? {} : { resposta }),
+            ...(tokens === undefined ? {} : { tokens }),
+          }),
+        )
       }
 
-      await publicarStatus($)
     })
 
     return terminado
@@ -548,7 +731,6 @@ export const register: Register = on => {
       const n = await read($, turno)
       // O que o turno em curso somou ao contexto e custou até aqui.
       await update($, rodadas, lista => comMedidaNaRodada(lista, n, medida))
-      await publicarStatus($)
     })
     // A cada medição, o detalhamento estimado acompanha (sem requisição).
     await anotar($, 'estimativa do detalhamento', () => detalharContexto($, 'summary'))
@@ -563,6 +745,8 @@ export const register: Register = on => {
       Text: tabela.Text,
       Button: tabela.Button,
       Input: 'Input' in tabela ? tabela.Input : null,
+      Markdown: tabela.Markdown,
+      Code: tabela.Code,
     }
     const dados = await lerDados($)
     const quadro: Quadro = {
@@ -582,16 +766,27 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const visao = await read($, ui)
 
-    if (!visao.isFaixa || e.props.hasSurvey) {
+    if (e.props.hasSurvey) {
       return next(e)
     }
 
     const tabela = $.ui.resolve(e)
+
+    // Sem o painel compacto na faixa, vai a linha de resumo, quando há leitura.
+    if (!visao.isFaixa) {
+      const resumo = textoDoStatus(await read($, agentes), await read($, contexto))
+      const abaixo = await next(e)
+
+      return resumo === undefined ? abaixo : linhaDeResumo(tabela, resumo, abaixo)
+    }
+
     const el: Elementos = {
       Box: tabela.Box,
       Text: tabela.Text,
       Button: tabela.Button,
       Input: 'Input' in tabela ? tabela.Input : null,
+      Markdown: tabela.Markdown,
+      Code: tabela.Code,
     }
     const dados = await lerDados($)
     const quadro: Quadro = {

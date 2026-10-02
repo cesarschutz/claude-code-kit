@@ -132,3 +132,19 @@ export const nomeCurtoDoLimite = (tipo: string): string => {
 
   return tipo === 'spend_limit' ? 'gasto' : tipo
 }
+
+// Markdown e Code só aceitam tab e quebra de linha como caracteres de
+// controle: saem as sequências ANSI e o resto dos controles.
+export const limpo = (texto: string): string =>
+  texto
+    .replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, '')
+    .replace(/\u001b\][^\u0007\u001b]*(\u0007|\u001b\\)/g, '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f]/g, '')
+
+// O fim de um texto longo, com o aviso do que ficou de fora.
+export const cauda = (texto: string, maximo: number): string =>
+  texto.length > maximo ? `… ${texto.length - maximo} caracteres antes\n${texto.slice(-maximo)}` : texto
+
+export const cabeca = (texto: string, maximo: number): string =>
+  texto.length > maximo ? `${texto.slice(0, maximo)}\n… mais ${texto.length - maximo} caracteres` : texto
