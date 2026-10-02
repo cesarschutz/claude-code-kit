@@ -11,10 +11,20 @@ import type {
   CockpitEdicao,
   CockpitLimite,
   CockpitPonto,
+  CockpitRodada,
   CockpitTurno,
   CockpitUi,
 } from '../types'
-import { curto, dolar, modeloCurto, primeiraLinha, relativo, umaLinha } from './formato'
+import {
+  curto,
+  dolar,
+  modeloCurto,
+  nomeCurtoDoLimite,
+  plural,
+  primeiraLinha,
+  relativo,
+  umaLinha,
+} from './formato'
 
 const MAX_AGENTES = 100
 const MAX_ARQUIVOS = 300
@@ -22,6 +32,7 @@ const MAX_COMANDOS = 100
 const MAX_TURNOS = 10
 const MAX_EDICOES = 60
 const MAX_PONTOS = 12
+const MAX_RODADAS = 30
 
 export const UI_INICIAL: CockpitUi = {
   aba: 1,
@@ -333,17 +344,101 @@ export const custoDoUltimoTurno = (contexto: CockpitContexto): number | undefine
     ? undefined
     : Math.max(0, contexto.custo - contexto.custoAntes)
 
+// A status line: só o que já tem leitura, cada parte com o seu nome. Sem
+// nada para dizer (sessão recém-aberta), não há linha.
 export const textoDoStatus = (
   agentes: readonly CockpitAgente[],
   contexto: CockpitContexto,
-): string => {
+): string | undefined => {
   const rodando = agentes.filter(agente => agente.estado === 'rodando').length
-  const preenchido = contexto.percentual === undefined ? '–' : `${contexto.percentual}%`
+  const prontos = agentes.length - rodando
+  const partes: string[] = []
 
-  return [
-    `agentes ${rodando} rodando`,
-    `${agentes.length - rodando} concluídos`,
-    `ctx ${preenchido}`,
-    dolar(contexto.custo),
-  ].join(' · ')
+  if (contexto.percentual !== undefined) {
+    partes.push(`contexto ${contexto.percentual}%`)
+
+    if (contexto.custo !== undefined) {
+      partes.push(dolar(contexto.custo))
+    }
+  }
+
+  if (contexto.limites.length > 0) {
+    const limites = contexto.limites.map(
+      limite => `${nomeCurtoDoLimite(limite.tipo)} ${limite.percentual}%`,
+    )
+    partes.push(`limite ${limites.join(', ')}`)
+  }
+
+  if (agentes.length > 0) {
+    const grupos = [
+      rodando > 0 ? `${rodando} rodando` : undefined,
+      prontos > 0 ? plural(prontos, 'concluído', 'concluídos') : undefined,
+    ].filter((grupo): grupo is string => grupo !== undefined)
+    partes.push(`agentes ${grupos.join(', ')}`)
+  }
+
+  return partes.length === 0 ? undefined : partes.join(' · ')
 }
+
+export const comRodada = (
+  lista: readonly CockpitRodada[],
+  n: number,
+  pedido: string,
+  agora: number,
+): CockpitRodada[] =>
+  [
+    ...lista.filter(rodada => rodada.n !== n),
+    { n, pedido, inicio: agora, ferramentas: 0, falhas: 0 },
+  ].slice(-MAX_RODADAS)
+
+const naRodada = (
+  lista: readonly CockpitRodada[],
+  n: number,
+  muda: (rodada: CockpitRodada) => CockpitRodada,
+): CockpitRodada[] => lista.map(rodada => (rodada.n === n ? muda(rodada) : rodada))
+
+export const comChamadaNaRodada = (
+  lista: readonly CockpitRodada[],
+  n: number,
+  isFalha: boolean,
+): CockpitRodada[] =>
+  naRodada(lista, n, rodada => ({
+    ...rodada,
+    ferramentas: rodada.ferramentas + 1,
+    falhas: rodada.falhas + (isFalha ? 1 : 0),
+  }))
+
+export const comFimDaRodada = (
+  lista: readonly CockpitRodada[],
+  n: number,
+  duracaoMs: number,
+  isAbortado: boolean,
+): CockpitRodada[] =>
+  naRodada(lista, n, rodada =>
+    isAbortado ? { ...rodada, duracaoMs, isAbortado: true } : { ...rodada, duracaoMs },
+  )
+
+// O que o turno somou ao contexto e quanto custou, pela medição mais recente.
+export const comMedidaNaRodada = (
+  lista: readonly CockpitRodada[],
+  n: number,
+  contexto: CockpitContexto,
+): CockpitRodada[] =>
+  naRodada(lista, n, rodada => {
+    const proxima: CockpitRodada = { ...rodada }
+    const custo = custoDoUltimoTurno(contexto)
+
+    if (contexto.tokens !== undefined) {
+      proxima.tokens = contexto.tokens
+
+      if (contexto.tokensAntes !== undefined) {
+        proxima.variacao = contexto.tokens - contexto.tokensAntes
+      }
+    }
+
+    if (custo !== undefined) {
+      proxima.custo = custo
+    }
+
+    return proxima
+  })

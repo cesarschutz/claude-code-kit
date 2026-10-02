@@ -1,7 +1,7 @@
 // Contrato do estado do mod: tudo o que o painel desenha fica em $.state,
 // sob estas chaves, e sobrevive ao hot reload. Só dados JSON.
 
-export type CockpitAba = 1 | 2 | 3 | 4
+export type CockpitAba = 1 | 2 | 3 | 4 | 5
 
 export type CockpitUi = {
   aba: CockpitAba
@@ -107,9 +107,25 @@ export type CockpitComando = {
   quem: string
 }
 
+// Um turno do loop principal, para a aba Turnos.
+export type CockpitRodada = {
+  n: number
+  // O começo do pedido que abriu o turno, numa linha.
+  pedido: string
+  inicio: number
+  duracaoMs?: number
+  isAbortado?: boolean
+  // O contexto ao fim do turno e quanto ele somou.
+  tokens?: number
+  variacao?: number
+  custo?: number
+  ferramentas: number
+  falhas: number
+}
+
 declare module 'claude-code' {
   interface PluginState {
-    'cs-cockpit': {
+    'csr-cockpit': {
       ui: CockpitUi
       agentes: CockpitAgente[]
       turnos: CockpitTurno[]
@@ -117,6 +133,7 @@ declare module 'claude-code' {
       arquivos: CockpitArquivo[]
       comandos: CockpitComando[]
       turno: number
+      rodadas: CockpitRodada[]
     }
   }
 }

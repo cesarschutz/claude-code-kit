@@ -120,3 +120,15 @@ export const nomeDoLimite = (tipo: string): string => {
 
   return tipo === 'spend_limit' ? 'gasto' : tipo
 }
+
+export const nomeCurtoDoLimite = (tipo: string): string => {
+  if (tipo === 'five_hour') {
+    return '5h'
+  }
+
+  if (tipo === 'seven_day') {
+    return '7d'
+  }
+
+  return tipo === 'spend_limit' ? 'gasto' : tipo
+}

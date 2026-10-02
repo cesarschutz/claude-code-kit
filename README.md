@@ -18,7 +18,7 @@ claude plugin marketplace add cesarschutz/claude-code-kit
 Instale um item pelo nome:
 
 ```bash
-claude plugin install cs-cockpit@cesarschutz
+claude plugin install csr-cockpit@cesarschutz
 ```
 
 Dentro de uma sessão no terminal, `/plugin` mostra o catálogo e instala por ali. O que for
@@ -28,14 +28,15 @@ instalado com a sessão aberta entra com `/reload-plugins`.
 
 ### Ferramentas
 
-#### [cs-cockpit](plugins/cs-cockpit/)
+#### [csr-cockpit](plugins/csr-cockpit/)
 
-Um painel ao lado da conversa com os instrumentos da sessão, em quatro abas: subagentes, diffs do
-turno, uso do contexto e custo, arquivos lidos e comandos executados. Uma status line fica sempre
-visível. O mod só observa: não bloqueia nem altera nenhuma chamada de ferramenta.
+Um painel ao lado da conversa com os instrumentos da sessão, em cinco abas: subagentes, diffs do
+turno, uso do contexto e custo, arquivos lidos e comandos executados, e o histórico dos turnos. Uma
+status line resume contexto, custo, limite de uso e agentes. O mod só observa: não bloqueia nem altera nenhuma chamada de ferramenta.
 
 ```
-1 Agentes   2 Diffs   3 Contexto   4 Arquivos
+ CSR  Cockpit
+1 Agentes   2 Diffs   3 Contexto   4 Arquivos   5 Turnos
 
 67% do contexto   134,4k / 200k
 ████████████████████████████░░░░░░░░░░░░░░
@@ -46,11 +47,11 @@ Limite de uso (5 h) 38% · renova em 2h10
 ```
 
 ```bash
-claude plugin install cs-cockpit@cesarschutz
+claude plugin install csr-cockpit@cesarschutz
 ```
 
 Abre e fecha com `/cockpit`. Pede o Claude Code 2.1.287 ou mais novo. Detalhes, teclas e limites
-no [README do cs-cockpit](plugins/cs-cockpit/).
+no [README do csr-cockpit](plugins/csr-cockpit/).
 
 ### Exemplos
 
@@ -98,17 +99,17 @@ git clone https://github.com/cesarschutz/claude-code-kit.git
 ```
 
 ```bash
-claude plugin validate ./claude-code-kit/plugins/cs-cockpit
+claude plugin validate ./claude-code-kit/plugins/csr-cockpit
 ```
 
 ## Atualizar e remover
 
 ```bash
-claude plugin update cs-cockpit@cesarschutz
+claude plugin update csr-cockpit@cesarschutz
 ```
 
 ```bash
-claude plugin uninstall cs-cockpit@cesarschutz
+claude plugin uninstall csr-cockpit@cesarschutz
 ```
 
 ## Requisitos

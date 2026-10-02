@@ -4,11 +4,14 @@
   "owner": {
     "name": "Cesar Schutz"
   },
+  "renames": {
+    "cs-cockpit": "csr-cockpit"
+  },
   "plugins": [
     {
-      "name": "cs-cockpit",
-      "source": "./plugins/cs-cockpit",
-      "description": "Mod: painel ao lado da conversa com agentes, diffs, contexto, arquivos e comandos, e uma status line. Só observa.",
+      "name": "csr-cockpit",
+      "source": "./plugins/csr-cockpit",
+      "description": "Mod: painel ao lado da conversa com agentes, diffs, contexto, arquivos, comandos e turnos, e uma status line. Só observa.",
       "category": "mod"
     },
     {

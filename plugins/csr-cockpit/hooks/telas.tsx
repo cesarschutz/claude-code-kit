@@ -18,7 +18,9 @@ import type {
   CockpitComando,
   CockpitContexto,
   CockpitEdicao,
+  CockpitLimite,
   CockpitLinha,
+  CockpitRodada,
   CockpitTurno,
   CockpitUi,
 } from '../types'
@@ -53,6 +55,7 @@ export type Dados = {
   contexto: CockpitContexto
   arquivos: readonly CockpitArquivo[]
   comandos: readonly CockpitComando[]
+  rodadas: readonly CockpitRodada[]
 }
 
 export type Quadro = {
@@ -80,9 +83,13 @@ const ABAS: readonly { n: CockpitAba; nome: string }[] = [
   { n: 2, nome: 'Diffs' },
   { n: 3, nome: 'Contexto' },
   { n: 4, nome: 'Arquivos' },
+  { n: 5, nome: 'Turnos' },
 ]
 
 const PASSOS_VISIVEIS = 12
+
+// Uma linha em branco entre os blocos; nenhuma na versão compacta.
+const respiro = (quadro: Quadro): number => (quadro.isCompacto ? 0 : 1)
 
 export const comEdicoes = (turnos: readonly CockpitTurno[]): CockpitTurno[] =>
   turnos.filter(turno => turno.edicoes.length > 0)
@@ -140,13 +147,27 @@ export const moverTurno = (
 // Algo na aba em vista muda com o relógio (tempo decorrido)?
 export const temRelogio = (dados: Dados): boolean =>
   (dados.ui.aba === 1 && dados.agentes.some(agente => agente.estado === 'rodando')) ||
-  (dados.ui.aba === 4 && dados.comandos.some(comando => comando.estado === 'rodando'))
+  (dados.ui.aba === 4 && dados.comandos.some(comando => comando.estado === 'rodando')) ||
+  (dados.ui.aba === 5 && dados.rodadas.some(rodada => rodada.duracaoMs === undefined))
+
+// A marca do painel: o selo "CSR" em azul e o nome ao lado.
+const marca = (el: Elementos, comNome: boolean): RenderElement => {
+  const { Text } = el
+
+  return (
+    <Text>
+      <Text color="suggestion" bold inverse>{' CSR '}</Text>
+      {comNome && <Text bold>{' Cockpit'}</Text>}
+    </Text>
+  )
+}
 
 const abas = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): RenderElement => {
   const { Box, Button, Text } = el
 
   return (
     <Box flexDirection="row" flexWrap="wrap" columnGap={2}>
+      {quadro.isCompacto && marca(el, false)}
       {ABAS.map(aba =>
         aba.n === dados.ui.aba ? (
           <Text color="claude" bold underline>
@@ -192,6 +213,9 @@ const linhaDoAgente = (el: Elementos, agente: CockpitAgente, quadro: Quadro): Re
       <Text color={cor}>{`${marca} `}</Text>
       <Text bold>{agente.tipo}</Text>
       <Text dimColor>{` · ${agente.modelo ?? 'modelo n/d'} · ${tempo}`}</Text>
+      {!quadro.isCompacto && agente.chamadas > 0 && (
+        <Text dimColor>{` · ${plural(agente.chamadas, 'chamada', 'chamadas')}`}</Text>
+      )}
       {quadro.isCompacto && <Text dimColor>{` · ${detalhe}`}</Text>}
     </Text>
   )
@@ -203,6 +227,7 @@ const linhaDoAgente = (el: Elementos, agente: CockpitAgente, quadro: Quadro): Re
   return (
     <Box flexDirection="column">
       {cabeca}
+      {agente.descricao !== '' && <Text wrap="truncate-end">{`  ${agente.descricao}`}</Text>}
       <Text dimColor wrap="truncate-end">{`  ${detalhe}`}</Text>
     </Box>
   )
@@ -215,13 +240,17 @@ const abaAgentes = (el: Elementos, dados: Dados, quadro: Quadro): RenderElement 
   const maximo = quadro.isCompacto ? 2 : 40
 
   return (
-    <Box key="agentes" flexDirection="column">
-      <Text color="suggestion" bold>{`Rodando (${rodando.length})`}</Text>
-      {rodando.length === 0 && <Text dimColor>Nenhum subagente rodando.</Text>}
-      {rodando.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro))}
-      <Text bold>{`Concluídos (${prontos.length})`}</Text>
-      {prontos.length === 0 && <Text dimColor>Nenhum subagente concluído.</Text>}
-      {prontos.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro))}
+    <Box key="agentes" flexDirection="column" rowGap={respiro(quadro)}>
+      <Box flexDirection="column">
+        <Text color="suggestion" bold>{`Rodando (${rodando.length})`}</Text>
+        {rodando.length === 0 && <Text dimColor>Nenhum subagente rodando.</Text>}
+        {rodando.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro))}
+      </Box>
+      <Box flexDirection="column">
+        <Text bold>{`Concluídos (${prontos.length})`}</Text>
+        {prontos.length === 0 && <Text dimColor>Nenhum subagente concluído.</Text>}
+        {prontos.slice(0, maximo).map(agente => linhaDoAgente(el, agente, quadro))}
+      </Box>
     </Box>
   )
 }
@@ -317,15 +346,21 @@ const abaDiffs = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): Re
   const resto = linhas.length - maximo + (edicao?.cortadas ?? 0)
 
   return (
-    <Box key="diffs" flexDirection="column">
-      <Text bold>
-        {`Turno ${turno.n} · ${plural(turno.edicoes.length, 'edição', 'edições')} em ${plural(arquivos, 'arquivo', 'arquivos')}`}
-      </Text>
-      {faixaDePassos(el, turno, passo, acoes)}
-      {edicao !== undefined && cabecaDaEdicao(el, edicao, quadro)}
-      {linhas.slice(0, maximo).map(linha => linhaDoDiff(el, linha))}
-      {edicao !== undefined && linhas.length === 0 && <Text dimColor>Sem diferença de conteúdo.</Text>}
-      {resto > 0 && <Text dimColor>{`… mais ${plural(resto, 'linha', 'linhas')}`}</Text>}
+    <Box key="diffs" flexDirection="column" rowGap={respiro(quadro)}>
+      <Box flexDirection="column">
+        <Text bold>
+          {`Turno ${turno.n} · ${plural(turno.edicoes.length, 'edição', 'edições')} em ${plural(arquivos, 'arquivo', 'arquivos')}`}
+        </Text>
+        {faixaDePassos(el, turno, passo, acoes)}
+      </Box>
+      <Box flexDirection="column">
+        {edicao !== undefined && cabecaDaEdicao(el, edicao, quadro)}
+        {linhas.slice(0, maximo).map(linha => linhaDoDiff(el, linha))}
+        {edicao !== undefined && linhas.length === 0 && (
+          <Text dimColor>Sem diferença de conteúdo.</Text>
+        )}
+        {resto > 0 && <Text dimColor>{`… mais ${plural(resto, 'linha', 'linhas')}`}</Text>}
+      </Box>
       <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
         <Button key="anterior" label="Anterior (p)" hotkey="p" onPress={() => acoes.passo(-1)} />
         <Button key="proximo" label="Próximo (n)" hotkey="n" onPress={() => acoes.passo(1)} />
@@ -378,15 +413,19 @@ const linhaDeBarra = (
   )
 }
 
-const TIPOS_DE_CATEGORIA = ['used', 'deferred', 'buffer', 'free']
+// O detalhamento em três grupos: o que ocupa a janela, o que fica fora dela
+// e o que sobra.
+const GRUPOS_DO_DETALHE: readonly { titulo: string; tipos: readonly string[] }[] = [
+  { titulo: 'Ocupando a janela', tipos: ['used'] },
+  { titulo: 'Fora da janela, carregado sob demanda', tipos: ['deferred'] },
+  { titulo: 'Reserva e espaço livre', tipos: ['buffer', 'free'] },
+]
 
-const NOME_DO_TIPO: Readonly<Record<string, string>> = {
-  deferred: 'sob demanda, fora da janela',
-  buffer: 'reserva da compactação',
-  free: 'livre',
-}
-
-const detalhamento = (el: Elementos, contexto: CockpitContexto): RenderElement | null => {
+const detalhamento = (
+  el: Elementos,
+  contexto: CockpitContexto,
+  quadro: Quadro,
+): RenderElement | null => {
   const { Box, Text } = el
   const detalhe = contexto.detalhe
 
@@ -394,28 +433,54 @@ const detalhamento = (el: Elementos, contexto: CockpitContexto): RenderElement |
     return null
   }
 
-  // O que ocupa o contexto primeiro; depois o que fica fora dele e o espaço livre.
-  const ordem = (tipo: string): number => Math.max(0, TIPOS_DE_CATEGORIA.indexOf(tipo))
-  const linhas = detalhe.categorias
-    .filter(categoria => categoria.tokens > 0)
-    .sort((a, b) => ordem(a.tipo) - ordem(b.tipo) || b.tokens - a.tokens)
   const origem = detalhe.isExato === true ? 'contagem exata' : 'estimativa'
   const quando = detalhe.turno === undefined || detalhe.turno === 0 ? '' : ` do turno ${detalhe.turno}`
+  const grupos = GRUPOS_DO_DETALHE.map(grupo => ({
+    titulo: grupo.titulo,
+    linhas: detalhe.categorias
+      .filter(categoria => categoria.tokens > 0 && grupo.tipos.includes(categoria.tipo))
+      .sort((a, b) => b.tokens - a.tokens),
+  })).filter(grupo => grupo.linhas.length > 0)
 
   return (
-    <Box key="detalhe" flexDirection="column">
+    <Box key="detalhe" flexDirection="column" rowGap={respiro(quadro)}>
       <Text dimColor>
         {`${tokens(detalhe.total)} de ${tokens(detalhe.janela)} · ${detalhe.modelo} · ${origem}${quando}`}
       </Text>
-      {linhas.map(categoria => (
-        <Text wrap="truncate-end">
-          <Text>{`${tokens(categoria.tokens).padStart(7)}  ${categoria.nome}`}</Text>
-          {categoria.tipo !== 'used' && (
-            <Text dimColor>{` (${NOME_DO_TIPO[categoria.tipo] ?? categoria.tipo})`}</Text>
-          )}
-        </Text>
+      {grupos.map(grupo => (
+        <Box flexDirection="column">
+          <Text dimColor>{grupo.titulo}</Text>
+          {grupo.linhas.map(categoria => (
+            <Text wrap="truncate-end">
+              {`${tokens(categoria.tokens).padStart(7)}  ${categoria.nome}`}
+            </Text>
+          ))}
+        </Box>
       ))}
     </Box>
+  )
+}
+
+// Uma linha por limite: nome, percentual, barra e quando renova.
+const linhaDoLimite = (
+  el: Elementos,
+  limite: CockpitLimite,
+  quadro: Quadro,
+): RenderElement => {
+  const { Text } = el
+  const percentual = `${limite.percentual}%`
+  const { cheio, vazio } = barra(limite.percentual, limitar(quadro.largura - 36, 8, 24))
+  const renova = renovaEm(limite.renova, quadro.agora)
+
+  return (
+    <Text wrap="truncate-end">
+      <Text dimColor>{`${nomeDoLimite(limite.tipo).padEnd(7)}${' '.repeat(Math.max(0, 5 - percentual.length))}`}</Text>
+      <Text bold>{percentual}</Text>
+      <Text>{'  '}</Text>
+      <Text color="suggestion">{cheio}</Text>
+      <Text dimColor>{vazio}</Text>
+      {renova !== undefined && <Text dimColor>{`  renova em ${renova}`}</Text>}
+    </Text>
   )
 }
 
@@ -443,7 +508,7 @@ const abaContexto = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
         <Text wrap="truncate-end">
           <Text color="claude" bold>{preenchido}</Text>
           <Text>{` · ${usado} / ${janela} · `}</Text>
-          <Text color="claude">{grafico(pontos, contexto.janela)}</Text>
+          <Text color="claude">{grafico(pontos, 0)}</Text>
           <Text dimColor>{` ${variacao(contexto)}`}</Text>
         </Text>
         <Text wrap="truncate-end">
@@ -456,48 +521,51 @@ const abaContexto = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
   }
 
   return (
-    <Box key="contexto" flexDirection="column">
-      <Text>
-        <Text color="claude" bold>{preenchido}</Text>
-        <Text dimColor> do contexto</Text>
-        <Text bold>{`   ${usado} / ${janela}`}</Text>
-      </Text>
-      {linhaDeBarra(el, contexto.percentual ?? 0, largura, 'claude')}
-      <Text dimColor>Últimos 12 turnos</Text>
-      <Text>
-        <Text color="claude">{pontos.length === 0 ? '–' : grafico(pontos, contexto.janela)}</Text>
-        <Text dimColor>{`  ${variacao(contexto)}`}</Text>
-      </Text>
-      <Text>
-        <Text dimColor>Custo da sessão </Text>
-        <Text bold>{dolar(contexto.custo)}</Text>
-        <Text dimColor>   Último turno </Text>
-        <Text bold>{dolar(custoDoUltimoTurno(contexto))}</Text>
-      </Text>
-      {contexto.limites.length === 0 && (
-        <Text dimColor>Limite de uso: sem leitura nesta sessão.</Text>
-      )}
-      {contexto.limites.map(limite => {
-        const renova = renovaEm(limite.renova, quadro.agora)
-
-        return (
-          <Box flexDirection="column">
-            <Text>
-              <Text dimColor>{`Limite de uso (${nomeDoLimite(limite.tipo)}) `}</Text>
-              <Text bold>{`${limite.percentual}%`}</Text>
-              {renova !== undefined && <Text dimColor>{` · renova em ${renova}`}</Text>}
-            </Text>
-            {linhaDeBarra(el, limite.percentual, largura, 'suggestion')}
-          </Box>
-        )
-      })}
-      <Text bold>Detalhamento do contexto</Text>
-      <Text dimColor wrap="wrap">
-        Estimativa por categoria, atualizada a cada turno, sem requisição extra. A contagem exata
-        faz uma requisição por ferramenta e por arquivo de memória; por isso fica no botão.
-      </Text>
-      {detalhamento(el, contexto)}
-      {botao}
+    <Box key="contexto" flexDirection="column" rowGap={1}>
+      <Box flexDirection="column">
+        <Text>
+          <Text color="claude" bold>{preenchido}</Text>
+          <Text dimColor> do contexto</Text>
+          <Text bold>{`   ${usado} / ${janela}`}</Text>
+        </Text>
+        {linhaDeBarra(el, contexto.percentual ?? 0, largura, 'claude')}
+      </Box>
+      <Box flexDirection="column">
+        <Text bold>Últimos 12 turnos</Text>
+        <Text>
+          <Text color="claude">{pontos.length === 0 ? '–' : grafico(pontos, 0)}</Text>
+          <Text dimColor>{`  ${variacao(contexto)}`}</Text>
+        </Text>
+      </Box>
+      <Box flexDirection="column">
+        <Text bold>Custo</Text>
+        <Text>
+          <Text dimColor>{'Sessão        '}</Text>
+          <Text bold>{dolar(contexto.custo)}</Text>
+        </Text>
+        <Text>
+          <Text dimColor>{'Último turno  '}</Text>
+          <Text bold>{dolar(custoDoUltimoTurno(contexto))}</Text>
+        </Text>
+      </Box>
+      <Box flexDirection="column">
+        <Text bold>Limite de uso</Text>
+        {contexto.limites.length === 0 && <Text dimColor>Sem leitura nesta sessão.</Text>}
+        {contexto.limites.map(limite => linhaDoLimite(el, limite, quadro))}
+      </Box>
+      <Box flexDirection="column">
+        <Text bold>Detalhamento do contexto</Text>
+        <Text dimColor wrap="wrap">
+          Estimativa atualizada a cada turno, sem requisição extra.
+        </Text>
+      </Box>
+      {detalhamento(el, contexto, quadro)}
+      <Box flexDirection="column">
+        {botao}
+        <Text dimColor wrap="wrap">
+          Faz uma requisição por ferramenta e por arquivo de memória.
+        </Text>
+      </Box>
     </Box>
   )
 }
@@ -542,7 +610,7 @@ const abaArquivos = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
   const maximo = quadro.isCompacto ? 2 : 60
 
   return (
-    <Box key="arquivos" flexDirection="column">
+    <Box key="arquivos" flexDirection="column" rowGap={respiro(quadro)}>
       {Input !== null && (
         <Input
           key="filtro"
@@ -554,18 +622,77 @@ const abaArquivos = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes):
           onSubmit={texto => acoes.filtro(texto)}
         />
       )}
-      <Text bold>{`Arquivos lidos (${arquivos.length})`}</Text>
-      {arquivos.length === 0 && <Text dimColor>Nenhum arquivo lido.</Text>}
-      {arquivos.slice(0, maximo).map(arquivo => (
-        <Text wrap="truncate-start">
-          <Text dimColor>{`${String(arquivo.vezes).padStart(3)}× `}</Text>
-          <Text>{relativo(arquivo.caminho, quadro.raiz)}</Text>
-          <Text dimColor>{` · ${arquivo.quem.join(', ')}`}</Text>
-        </Text>
-      ))}
-      <Text bold>{`Comandos Bash (${comandos.length})`}</Text>
-      {comandos.length === 0 && <Text dimColor>Nenhum comando Bash.</Text>}
-      {comandos.slice(0, maximo).map(comando => linhaDoComando(el, comando, quadro))}
+      <Box flexDirection="column">
+        <Text bold>{`Arquivos lidos (${arquivos.length})`}</Text>
+        {arquivos.length === 0 && <Text dimColor>Nenhum arquivo lido.</Text>}
+        {arquivos.slice(0, maximo).map(arquivo => (
+          <Text wrap="truncate-start">
+            <Text dimColor>{`${String(arquivo.vezes).padStart(3)}× `}</Text>
+            <Text>{relativo(arquivo.caminho, quadro.raiz)}</Text>
+            <Text dimColor>{` · ${arquivo.quem.join(', ')}`}</Text>
+          </Text>
+        ))}
+      </Box>
+      <Box flexDirection="column">
+        <Text bold>{`Comandos Bash (${comandos.length})`}</Text>
+        {comandos.length === 0 && <Text dimColor>Nenhum comando Bash.</Text>}
+        {comandos.slice(0, maximo).map(comando => linhaDoComando(el, comando, quadro))}
+      </Box>
+    </Box>
+  )
+}
+
+const linhaDaRodada = (
+  el: Elementos,
+  rodada: CockpitRodada,
+  edicoes: number,
+  quadro: Quadro,
+): RenderElement => {
+  const { Box, Text } = el
+  const isAndando = rodada.duracaoMs === undefined
+  const tempo = isAndando ? duracao(quadro.agora - rodada.inicio) : duracao(rodada.duracaoMs ?? 0)
+  const partes = [
+    rodada.variacao === undefined
+      ? undefined
+      : `${rodada.variacao >= 0 ? '+' : '−'}${tokens(rodada.variacao)} de contexto`,
+    rodada.custo === undefined ? undefined : dolar(rodada.custo),
+    plural(rodada.ferramentas, 'ferramenta', 'ferramentas'),
+    edicoes > 0 ? plural(edicoes, 'edição', 'edições') : undefined,
+  ].filter((parte): parte is string => parte !== undefined)
+
+  return (
+    <Box flexDirection="column">
+      <Text wrap="truncate-end">
+        <Text bold>{`Turno ${rodada.n}`}</Text>
+        {isAndando && <Text color="suggestion">{` · em andamento · ${tempo}`}</Text>}
+        {!isAndando && <Text dimColor>{` · ${tempo}`}</Text>}
+        {rodada.isAbortado === true && <Text color="error">{' · interrompido'}</Text>}
+        {rodada.falhas > 0 && (
+          <Text color="error">{` · ${plural(rodada.falhas, 'falha', 'falhas')}`}</Text>
+        )}
+      </Text>
+      {!quadro.isCompacto && rodada.pedido !== '' && (
+        <Text wrap="truncate-end">{`  ${rodada.pedido}`}</Text>
+      )}
+      <Text dimColor wrap="truncate-end">{`  ${partes.join(' · ')}`}</Text>
+    </Box>
+  )
+}
+
+const abaTurnos = (el: Elementos, dados: Dados, quadro: Quadro): RenderElement => {
+  const { Box, Text } = el
+  const lista = [...dados.rodadas].reverse()
+  const maximo = quadro.isCompacto ? 2 : 30
+  const edicoesDe = (n: number): number =>
+    dados.turnos.find(turno => turno.n === n)?.edicoes.length ?? 0
+
+  return (
+    <Box key="turnos" flexDirection="column" rowGap={respiro(quadro)}>
+      <Box flexDirection="column">
+        <Text bold>{`Turnos (${lista.length})`}</Text>
+        {lista.length === 0 && <Text dimColor>Nenhum turno nesta sessão ainda.</Text>}
+      </Box>
+      {lista.slice(0, maximo).map(rodada => linhaDaRodada(el, rodada, edicoesDe(rodada.n), quadro))}
     </Box>
   )
 }
@@ -579,9 +706,11 @@ const corpo = (el: Elementos, dados: Dados, quadro: Quadro, acoes: Acoes): Rende
     return abaDiffs(el, dados, quadro, acoes)
   }
 
-  return dados.ui.aba === 3
-    ? abaContexto(el, dados, quadro, acoes)
-    : abaArquivos(el, dados, quadro, acoes)
+  if (dados.ui.aba === 3) {
+    return abaContexto(el, dados, quadro, acoes)
+  }
+
+  return dados.ui.aba === 4 ? abaArquivos(el, dados, quadro, acoes) : abaTurnos(el, dados, quadro)
 }
 
 export const desenhar = (
@@ -590,11 +719,15 @@ export const desenhar = (
   quadro: Quadro,
   acoes: Acoes,
 ): RenderElement => {
-  const { Box } = el
+  const { Box, Text } = el
 
   return (
-    <Box flexDirection="column" rowGap={quadro.isCompacto ? 0 : 1}>
-      {abas(el, dados, quadro, acoes)}
+    <Box flexDirection="column" rowGap={respiro(quadro)}>
+      <Box flexDirection="column">
+        {!quadro.isCompacto && marca(el, true)}
+        {abas(el, dados, quadro, acoes)}
+        {!quadro.isCompacto && <Text dimColor>{'─'.repeat(limitar(quadro.largura, 10, 160))}</Text>}
+      </Box>
       {corpo(el, dados, quadro, acoes)}
     </Box>
   )

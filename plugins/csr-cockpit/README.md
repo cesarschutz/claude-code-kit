@@ -1,25 +1,34 @@
-# cs-cockpit
+# csr-cockpit
 
 Um painel ao lado da conversa do Claude Code, com os instrumentos da sessão: o que os subagentes
 estão fazendo, o que foi editado, quanto do contexto já foi usado e quais arquivos e comandos
 passaram por ali. Mais uma status line sempre visível.
 
-O cs-cockpit só observa. Nenhum dos seus hooks bloqueia, altera ou segura uma chamada de
+O csr-cockpit só observa. Nenhum dos seus hooks bloqueia, altera ou segura uma chamada de
 ferramenta: todos repassam a chamada e devolvem o resultado como veio.
 
 ```
-1 Agentes   2 Diffs   3 Contexto   4 Arquivos
+ CSR  Cockpit
+1 Agentes   2 Diffs   3 Contexto   4 Arquivos   5 Turnos
+────────────────────────────────────────────────────────
 
 67% do contexto   134,4k / 200k
 ████████████████████████████░░░░░░░░░░░░░░
+
 Últimos 12 turnos
 ▂▃▃▄▅▅▆  ▲ +18,2k no último turno
-Custo da sessão US$ 1,84   Último turno US$ 0,21
-Limite de uso (5 h) 38% · renova em 2h10
+
+Custo
+Sessão        US$ 1,84
+Último turno  US$ 0,21
+
+Limite de uso
+5 h      38%  █████████░░░░░░░░░░░░░░░  renova em 2h10
+7 dias   60%  ██████████████░░░░░░░░░░  renova em 2d
 ```
 
 ```
-agentes 2 rodando · 3 concluídos · ctx 67% · US$ 1,84
+contexto 67% · US$ 1,84 · limite 5h 38%, 7d 60% · agentes 2 rodando, 3 concluídos
 ```
 
 ## Requisitos
@@ -36,7 +45,7 @@ claude plugin marketplace add cesarschutz/claude-code-kit
 ```
 
 ```bash
-claude plugin install cs-cockpit@cesarschutz
+claude plugin install csr-cockpit@cesarschutz
 ```
 
 ## Usar
@@ -45,7 +54,7 @@ claude plugin install cs-cockpit@cesarschutz
 |---|---|
 | `/cockpit` | Abre e fecha o painel |
 | `Esc` | Fecha o painel |
-| `1` `2` `3` `4` | Trocam de aba, com o painel em foco |
+| `1` a `5` | Trocam de aba, com o painel em foco |
 | `p` `n` | Diff anterior e próximo (aba Diffs) |
 | `t` | Turno anterior (aba Diffs) |
 
@@ -56,8 +65,8 @@ abas.
 ## As abas
 
 **1 Agentes.** Subagentes rodando e concluídos, com contagem. Para cada um: tipo, modelo, tempo
-decorrido e a atividade atual (última ferramenta e argumento). Nos concluídos, a duração e a
-primeira linha do resultado.
+decorrido, número de chamadas, a tarefa que recebeu e a atividade atual (última ferramenta e
+argumento). Nos concluídos, a duração e a primeira linha do resultado.
 
 **2 Diffs.** Cada Edit e Write do loop principal, agrupado por turno (os últimos 10). Um diff por
 vez, com número de linha, caminho do arquivo e contagem de linhas que entraram e saíram. No Write
@@ -73,6 +82,10 @@ memória; por isso só acontece quando é apertado.
 **4 Arquivos.** Arquivos lidos (caminho, quantas vezes e por quem) e comandos Bash (status, exit
 code e duração), com um campo de filtro.
 
+**5 Turnos.** Um registro por turno da conversa, do mais recente ao mais antigo: o começo do
+pedido, a duração, quanto o turno somou ao contexto, quanto custou, quantas ferramentas foram
+chamadas, quantas falharam e quantas edições houve. O turno em curso aparece em andamento.
+
 ## Limites conhecidos
 
 - **Exit code do Bash.** O resultado da ferramenta não traz o código como campo. Em falha, ele é
@@ -80,34 +93,37 @@ code e duração), com um campo de filtro.
 - **Comando em segundo plano.** A chamada volta na hora; o fim real não chega ao mod. A linha fica
   como "em segundo plano".
 - **Versão compacta.** `Esc` não a fecha; use `/cockpit` ou o botão Fechar.
-- **Tamanho.** Guarda 100 agentes, 300 arquivos, 100 comandos, 10 turnos de 60 edições e 400
-  linhas por diff.
+- **Tamanho.** Guarda 100 agentes, 300 arquivos, 100 comandos, 30 turnos, 10 turnos de diffs com
+  60 edições cada e 400 linhas por diff.
+- **Status line.** Só aparece quando há leitura (depois da primeira resposta do modelo). O ícone
+  e a cor da linha são do Claude Code, não do mod.
 - **API em evolução.** A API de mods pode mudar entre versões do Claude Code. Este mod foi escrito
   e testado na 2.1.283, ainda em acesso antecipado, no terminal. No app Desktop, o desenho do
   painel ainda não foi conferido.
 
 ## Privacidade
 
-O cs-cockpit não faz chamada de rede nem grava arquivo. O que ele registra fica no estado da
-sessão, na memória do Claude Code. Para conferir o que o mod chama antes de instalar, clone o
+O csr-cockpit não faz chamada de rede nem grava arquivo. O que ele registra fica no estado da
+sessão, na memória do Claude Code: caminhos de arquivos, comandos, diffs e os primeiros 80
+caracteres de cada pedido (para identificar o turno na aba Turnos). Para conferir o que o mod chama antes de instalar, clone o
 repositório e rode:
 
 ```bash
-claude plugin validate ./plugins/cs-cockpit
+claude plugin validate ./plugins/csr-cockpit
 ```
 
 ## Desenvolver
 
 ```bash
-claude --plugin-dir ./plugins/cs-cockpit
+claude --plugin-dir ./plugins/csr-cockpit
 ```
 
 ```bash
-claude plugin validate ./plugins/cs-cockpit --strict
+claude plugin validate ./plugins/csr-cockpit --strict
 ```
 
 ```bash
-claude plugin test ./plugins/cs-cockpit
+claude plugin test ./plugins/csr-cockpit
 ```
 
 Os testes rodam cada aba nas superfícies `terminal` e `desktop`, além da status line. A pasta
@@ -120,7 +136,7 @@ hooks/register.tsx           hooks, comando /cockpit e ações dos botões
 hooks/dados.ts               transformações do estado
 hooks/diff.ts                diff por linhas
 hooks/formato.ts             números, durações e barras em pt-BR
-hooks/telas.tsx              desenho das quatro abas
+hooks/telas.tsx              desenho das cinco abas
 types/index.d.ts             contrato do estado
 tests/                       testes
 ```

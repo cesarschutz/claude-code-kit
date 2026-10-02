@@ -14,7 +14,7 @@ import {
   subagente,
 } from './motor'
 
-const MOD = 'cs-cockpit'
+const MOD = 'csr-cockpit'
 const PAINEL = { plugin: MOD, component: 'Pane', requestId: MOD } as const
 
 type Achados = {
@@ -43,33 +43,40 @@ const uso = (tokens: number, percent: number, usd: number): SessionUsage => ({
   cost: { usd },
 })
 
-test('status line: agentes rodando e concluídos, contexto e custo', async ($, on) => {
+test('status line: cada parte com o seu nome, só quando há leitura', async ($, on) => {
   const motor = ligar(on)
   motor.uso = uso(134_400, 67, 1.84)
   await $.session.start(INICIO)
-  expect(motor.visto.status.at(-1)).toBe('agentes 0 rodando · 0 concluídos · ctx 67% · US$ 1,84')
+  expect(motor.visto.status.at(-1)).toBe('contexto 67% · US$ 1,84')
 
   const explore = await $.agent.spawn(subagente('t1', 'Explore', 'procurar hooks'))
   await $.agent.spawn(subagente('t2', 'Plan', 'planejar'))
-  expect(motor.visto.status.at(-1)).toBe('agentes 2 rodando · 0 concluídos · ctx 67% · US$ 1,84')
+  expect(motor.visto.status.at(-1)).toBe('contexto 67% · US$ 1,84 · agentes 2 rodando')
 
   await $.turn.complete(fimDoTurno('s1', 'Pronto.', 4000, explore.agentId))
-  expect(motor.visto.status.at(-1)).toBe('agentes 1 rodando · 1 concluídos · ctx 67% · US$ 1,84')
+  expect(motor.visto.status.at(-1)).toBe(
+    'contexto 67% · US$ 1,84 · agentes 1 rodando, 1 concluído',
+  )
 
   await $.session.measure({
     context: { tokens: 152_600, window: 200_000, percent: 76 },
-    rateLimits: [],
+    rateLimits: [
+      { kind: 'five_hour', percentUsed: 38 },
+      { kind: 'seven_day', percentUsed: 60 },
+    ],
     cost: { usd: 2.05 },
-    changed: ['context', 'cost'],
+    changed: ['context', 'cost', 'rateLimits'],
   })
-  expect(motor.visto.status.at(-1)).toBe('agentes 1 rodando · 1 concluídos · ctx 76% · US$ 2,05')
+  expect(motor.visto.status.at(-1)).toBe(
+    'contexto 76% · US$ 2,05 · limite 5h 38%, 7d 60% · agentes 1 rodando, 1 concluído',
+  )
 })
 
-test('status line: sem leitura de contexto nem de custo, mostra travessão', async ($, on) => {
+test('status line: sessão recém-aberta, sem leitura nenhuma, não mostra linha', async ($, on) => {
   const motor = ligar(on)
   motor.uso = { startedAt: AGORA, context: { window: 200_000 }, rateLimits: [] }
   await $.session.start(INICIO)
-  expect(motor.visto.status.at(-1)).toBe('agentes 0 rodando · 0 concluídos · ctx – · US$ –')
+  expect(motor.visto.status).toEqual([])
 })
 
 test('aba 1, Agentes: rodando com atividade, concluídos com duração e resultado', async ($, on) => {
@@ -87,7 +94,8 @@ test('aba 1, Agentes: rodando com atividade, concluídos com duração e resulta
     const ui = await $.ui.mount({ ...PAINEL, surface, props: painel() })
     await mostra(ui, 'Rodando (1)')
     expect(await corDe(ui, 'Rodando (1)')).toBe('suggestion')
-    await mostra(ui, /Explore · haiku-4-5 · 1m12s/)
+    await mostra(ui, /Explore · haiku-4-5 · 1m12s · 1 chamada/)
+    await mostra(ui, '  procurar hooks')
     await mostra(ui, 'Read src/a.ts')
     expect(await corDe(ui, /^● $/)).toBe('suggestion')
 
@@ -213,11 +221,13 @@ test('aba 3, Contexto: uso, gráfico, custo, limite, estimativa a cada turno e c
     expect(await corDe(ui, /^67%$/)).toBe('claude')
     await mostra(ui, '134,4k / 200k')
     await mostra(ui, 'Últimos 12 turnos')
-    await mostra(ui, /^▅▆$/)
+    // O gráfico vai na escala do maior turno da lista.
+    await mostra(ui, /^▇█$/)
     await mostra(ui, '▲ +18,2k no último turno')
     await mostra(ui, /^US\$ 1,84$/)
     await mostra(ui, /^US\$ 0,21$/)
-    await mostra(ui, 'Limite de uso (5 h)')
+    await mostra(ui, 'Limite de uso')
+    await mostra(ui, /^5 h /)
     await mostra(ui, /^38%$/)
     await mostra(ui, 'renova em 2h10')
     // O detalhamento estimado acompanha os turnos, sem ninguém clicar.
@@ -241,7 +251,8 @@ test('aba 3, Contexto: uso, gráfico, custo, limite, estimativa a cada turno e c
   await mostra(ui, /120k {2}Messages/)
   await mostra(ui, /4,2k {2}System prompt/)
   await mostra(ui, /42,8k {2}Free space/)
-  await mostra(ui, ' (livre)')
+  await mostra(ui, 'Ocupando a janela')
+  await mostra(ui, 'Reserva e espaço livre')
 
   // Outra medição no mesmo turno não troca a contagem exata pela estimativa.
   await $.session.measure({ ...motor.uso, changed: ['cost'] })
@@ -323,6 +334,48 @@ test('aba 4, Arquivos e comandos: leituras por autor, status do Bash e filtro', 
   await ui.unmount()
 })
 
+test('aba 5, Turnos: duração, contexto somado, custo, ferramentas e falhas de cada turno', async ($, on) => {
+  const motor = ligar(on)
+  motor.uso = uso(80_000, 40, 1.2)
+  motor.responder = e =>
+    e.command === 'npm test'
+      ? { isError: true, result: 'Exit code 1', text: 'Exit code 1' }
+      : { result: { structuredPatch: [] }, text: 'ok' }
+  await $.session.start(INICIO)
+
+  await $.turn.start({ text: 'ajusta o README\ne publica', turnId: 't1' })
+  await $.tool.call({ tool: 'Read', file_path: '/proj/README.md' })
+  await $.tool.call({ tool: 'Bash', command: 'npm test' })
+  await $.tool.call({ tool: 'Edit', file_path: '/proj/README.md', old_string: 'a', new_string: 'b' })
+  await $.turn.complete(fimDoTurno('t1', 'feito', 72_000))
+  motor.uso = uso(85_500, 43, 1.4)
+  await $.session.measure({ ...motor.uso, changed: ['context', 'cost'] })
+
+  await $.turn.start({ text: 'segundo pedido', turnId: 't2' })
+  await motor.relogio.advance(5000)
+
+  for (const surface of SUPERFICIES) {
+    const ui = await $.ui.mount({ ...PAINEL, surface, props: painel('dock', 100) })
+    expect((await ui.find({ key: 'aba-5' }))?.props.hotkey).toBe('5')
+    await ui.press({ key: 'aba-5' })
+    await mostra(ui, 'Turnos (2)')
+
+    // O turno em curso, em azul, com o tempo correndo.
+    await mostra(ui, /^Turno 2$/)
+    expect(await corDe(ui, /^ · em andamento · 5,0s$/)).toBe('suggestion')
+    await mostra(ui, '  segundo pedido')
+
+    // O turno fechado: duração, falhas em vermelho, o pedido e os números.
+    await mostra(ui, /^Turno 1$/)
+    await mostra(ui, /^ · 1m12s$/)
+    expect(await corDe(ui, /^ · 1 falha$/)).toBe('error')
+    await mostra(ui, '  ajusta o README e publica')
+    await mostra(ui, '  +5,5k de contexto · US$ 0,20 · 3 ferramentas · 1 edição')
+    await ui.press({ key: 'aba-1' })
+    await ui.unmount()
+  }
+})
+
 test('só observa: a entrada e o resultado de cada chamada passam intactos', async ($, on) => {
   const motor = ligar(on)
   const resposta: ToolCallResult = {
@@ -350,7 +403,7 @@ test('só observa: a entrada e o resultado de cada chamada passam intactos', asy
   expect(await $.turn.complete(fimDoTurno('t1', 'resposta', 10))).toMatchObject({ text: 'resposta' })
 })
 
-test('/cockpit abre com foco e Esc fechando, e fecha na segunda vez; 1 a 4 trocam de aba', async ($, on) => {
+test('/cockpit abre com foco e Esc fechando, e fecha na segunda vez; 1 a 5 trocam de aba', async ($, on) => {
   const motor = ligar(on)
   await $.session.start(INICIO)
 
@@ -359,10 +412,15 @@ test('/cockpit abre com foco e Esc fechando, e fecha na segunda vez; 1 a 4 troca
 
   for (const surface of SUPERFICIES) {
     const ui = await $.ui.mount({ ...PAINEL, surface, props: painel() })
+    // A marca no topo: o selo CSR em azul e o nome.
+    const selo = await ui.find({ type: 'Text', text: /^ CSR $/ })
+    expect(selo?.props.color).toBe('suggestion')
+    expect(selo?.props.inverse).toBe(true)
+    await mostra(ui, /^ Cockpit$/)
     const ativa = surface === 'terminal' ? '1: Agentes' : '1 Agentes'
     expect(await corDe(ui, ativa)).toBe('claude')
 
-    for (const n of ['2', '3', '4']) {
+    for (const n of ['2', '3', '4', '5']) {
       expect((await ui.find({ key: `aba-${n}` }))?.props.hotkey).toBe(n)
     }
 
@@ -398,6 +456,9 @@ test('sem lugar ao lado: versão compacta acima do prompt', async ($, on) => {
     await mostra(ui, /^● Explore · haiku-4-5 · \d+,\ds · Read src\/a\.ts$/)
     expect((await ui.find({ key: 'aba-2' }))?.props.hotkey).toBe('2')
     expect(await ui.find({ key: 'fechar' })).toBeDefined()
+    // Na versão compacta, só o selo, na linha das abas.
+    expect(await ui.find({ type: 'Text', text: /^ CSR $/ })).toBeDefined()
+    await naoMostra(ui, /^ Cockpit$/)
     await ui.unmount()
   }
 

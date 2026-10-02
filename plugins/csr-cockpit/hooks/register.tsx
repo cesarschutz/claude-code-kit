@@ -1,4 +1,4 @@
-// cs-cockpit: um painel ao lado da conversa, com quatro abas e uma status
+// csr-cockpit: um painel ao lado da conversa, com cinco abas e uma status
 // line. O mod só observa: todo hook de evento chama next(e) com o mesmo `e`
 // e devolve o que next devolveu. O que ele registra fica em $.state.
 
@@ -26,14 +26,18 @@ import {
   UI_INICIAL,
   comAgente,
   comAtividade,
+  comChamadaNaRodada,
   comComando,
   comEdicao,
+  comFimDaRodada,
   comFimDoAgente,
   comFimDoComando,
   comInicioDoTurno,
   comLeitura,
   comListaDaSessao,
   comMedida,
+  comMedidaNaRodada,
+  comRodada,
   resumoDaChamada,
   textoDoStatus,
 } from './dados'
@@ -42,16 +46,17 @@ import { curto, umaLinha } from './formato'
 import { desenhar, moverPasso, moverTurno, temRelogio } from './telas'
 import type { Acoes, Dados, Elementos, Quadro } from './telas'
 
-const PAINEL = 'cs-cockpit'
+const PAINEL = 'csr-cockpit'
 const TITULO = 'Cockpit'
 
-const ui = atom({ plugin: 'cs-cockpit', key: 'ui' } as const, UI_INICIAL)
-const agentes = atom({ plugin: 'cs-cockpit', key: 'agentes' } as const, [])
-const turnos = atom({ plugin: 'cs-cockpit', key: 'turnos' } as const, [])
-const contexto = atom({ plugin: 'cs-cockpit', key: 'contexto' } as const, CONTEXTO_INICIAL)
-const arquivos = atom({ plugin: 'cs-cockpit', key: 'arquivos' } as const, [])
-const comandos = atom({ plugin: 'cs-cockpit', key: 'comandos' } as const, [])
-const turno = atom({ plugin: 'cs-cockpit', key: 'turno' } as const, 0)
+const ui = atom({ plugin: 'csr-cockpit', key: 'ui' } as const, UI_INICIAL)
+const agentes = atom({ plugin: 'csr-cockpit', key: 'agentes' } as const, [])
+const turnos = atom({ plugin: 'csr-cockpit', key: 'turnos' } as const, [])
+const contexto = atom({ plugin: 'csr-cockpit', key: 'contexto' } as const, CONTEXTO_INICIAL)
+const arquivos = atom({ plugin: 'csr-cockpit', key: 'arquivos' } as const, [])
+const comandos = atom({ plugin: 'csr-cockpit', key: 'comandos' } as const, [])
+const turno = atom({ plugin: 'csr-cockpit', key: 'turno' } as const, 0)
+const rodadas = atom({ plugin: 'csr-cockpit', key: 'rodadas' } as const, [])
 
 type Chamada = Frozen<ToolCallInput>
 
@@ -65,6 +70,7 @@ const comoTexto = (valor: unknown): string => (typeof valor === 'string' ? valor
 // Do módulo, refeitos a cada recarga: nada que precise sobreviver a ela.
 let raiz = ''
 let ultimoStatus: string | undefined
+let temStatus = false
 let isRelogioLigado = false
 
 // O registro nunca derruba o hook: uma falha vai para o log de depuração.
@@ -72,15 +78,21 @@ const anotar = async ($: EngineInterface, onde: string, trabalho: () => Promise<
   try {
     await trabalho()
   } catch (erro) {
-    $.ui.log(`cs-cockpit: ${onde}: ${String(erro)}`, { to: 'debug' })
+    $.ui.log(`csr-cockpit: ${onde}: ${String(erro)}`, { to: 'debug' })
   }
 }
 
 const publicarStatus = async ($: EngineInterface) => {
   const texto = textoDoStatus(await read($, agentes), await read($, contexto))
 
+  // Sem nada para dizer e sem linha no ar, não há o que publicar.
+  if (texto === undefined && !temStatus) {
+    return
+  }
+
   if (texto !== ultimoStatus) {
     ultimoStatus = texto
+    temStatus = texto !== undefined
     $.ui.status(texto)
   }
 }
@@ -92,7 +104,8 @@ const gravarMedida = async (
   custo: SessionCost | undefined,
 ) => {
   const n = await read($, turno)
-  await update($, contexto, atual => comMedida(atual, n, medido, limites, custo))
+
+  return update($, contexto, atual => comMedida(atual, n, medido, limites, custo))
 }
 
 // A chamada simples é de graça: os números da status line do próprio app.
@@ -339,7 +352,7 @@ const acoes = ($: EngineInterface): Acoes => ({
 
       try {
         if (!(await detalharContexto($, 'full'))) {
-          $.ui.toast('cs-cockpit: a sessão não devolveu o detalhamento do contexto')
+          $.ui.toast('csr-cockpit: a sessão não devolveu o detalhamento do contexto')
         }
       } finally {
         await update($, ui, atual => ({ ...atual, isCalculando: false }))
@@ -355,6 +368,7 @@ const lerDados = async ($: EngineInterface): Promise<Dados> => ({
   contexto: await read($, contexto),
   arquivos: await read($, arquivos),
   comandos: await read($, comandos),
+  rodadas: await read($, rodadas),
 })
 
 export const register: Register = on => {
@@ -403,7 +417,7 @@ export const register: Register = on => {
     const aberto = await $.ui.open({ id: PAINEL, title: TITULO, focus: true, closeOnEscape: true })
 
     if (aberto.isPlaced) {
-      return { text: 'Cockpit aberto. 1 a 4 trocam de aba, Esc fecha.' }
+      return { text: 'Cockpit aberto. 1 a 5 trocam de aba, Esc fecha.' }
     }
 
     // Sem lugar para o painel: ele sai e a versão compacta sobe para a faixa.
@@ -434,6 +448,11 @@ export const register: Register = on => {
       await anotar($, 'tool.call (fim)', () =>
         aoTerminar($, e, saida, Math.round(performance.now() - partida), antes),
       )
+      await anotar($, 'tool.call (turno)', async () => {
+        const n = await read($, turno)
+        const isFalha = saida.deny !== undefined || saida.isError === true
+        await update($, rodadas, lista => comChamadaNaRodada(lista, n, isFalha))
+      })
 
       return saida
     } catch (erro) {
@@ -478,7 +497,10 @@ export const register: Register = on => {
     iniciado.catch(() => undefined)
 
     await anotar($, 'turn.start', async () => {
-      await update($, turno, n => n + 1)
+      const n = await update($, turno, atual => atual + 1)
+      const agora = await $.clock.now()
+      const pedido = curto(umaLinha(e.text), 80)
+      await update($, rodadas, lista => comRodada(lista, n, pedido, agora))
       await anotar($, 'medição do início do turno', () => medir($))
       await update($, contexto, comInicioDoTurno)
     })
@@ -494,7 +516,10 @@ export const register: Register = on => {
       const id = e.agentId
 
       if (id === undefined) {
-        // Fim de um turno do loop principal: acerta quem morreu sem avisar.
+        // Fim de um turno do loop principal: fecha o turno na aba Turnos e
+        // acerta os agentes que morreram sem avisar.
+        const n = await read($, turno)
+        await update($, rodadas, lista => comFimDaRodada(lista, n, e.durationMs, e.isAborted))
         await acertarAgentes($)
       } else {
         const agora = await $.clock.now()
@@ -519,7 +544,10 @@ export const register: Register = on => {
     medido.catch(() => undefined)
 
     await anotar($, 'session.measure', async () => {
-      await gravarMedida($, e.context, e.rateLimits, e.cost)
+      const medida = await gravarMedida($, e.context, e.rateLimits, e.cost)
+      const n = await read($, turno)
+      // O que o turno em curso somou ao contexto e custou até aqui.
+      await update($, rodadas, lista => comMedidaNaRodada(lista, n, medida))
       await publicarStatus($)
     })
     // A cada medição, o detalhamento estimado acompanha (sem requisição).

@@ -16,7 +16,7 @@ pasta `hooks/`.
 ## O que mais um plugin pode levar
 
 - **Mod** (`hooks/hooks.json` com `modules`): código que roda dentro do Claude Code, como o
-  `cs-cockpit` deste repositório.
+  `csr-cockpit` deste repositório.
 - **Servidor MCP** (`.mcp.json`): ferramentas externas para o Claude.
 - **Comandos** (`commands/*.md`): a forma antiga das skills. Em plugin novo, use `skills/`.
 

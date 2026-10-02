@@ -1,0 +1,13 @@
+{
+  "name": "csr-cockpit",
+  "version": "0.3.0",
+  "description": "Painel ao lado da conversa com agentes, diffs, contexto, arquivos, comandos e turnos, e uma status line. Só observa.",
+  "author": {
+    "name": "Cesar Schutz",
+    "url": "https://github.com/cesarschutz"
+  },
+  "homepage": "https://github.com/cesarschutz/claude-code-kit/tree/main/plugins/csr-cockpit",
+  "repository": "https://github.com/cesarschutz/claude-code-kit",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
