@@ -1,0 +1,12 @@
+{
+  "name": "csr-reviewer",
+  "version": "0.2.0",
+  "description": "Mod: segundo par de olhos com revisão paralela em painel. Automático desativado por padrão, preferência global persistente e controle por sessão.",
+  "author": {
+    "name": "Cesar Schutz",
+    "url": "https://github.com/cesarschutz"
+  },
+  "homepage": "https://github.com/cesarschutz/claude-code-kit/tree/main/plugins/csr-reviewer",
+  "repository": "https://github.com/cesarschutz/claude-code-kit",
+  "license": "MIT"
+}

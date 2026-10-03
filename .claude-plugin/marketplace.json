@@ -15,6 +15,12 @@
       "category": "mod"
     },
     {
+      "name": "csr-reviewer",
+      "source": "./plugins/csr-reviewer",
+      "description": "Mod: segundo par de olhos que revisa cada turno concluído em um fork somente-leitura e mostra riscos e pontos esquecidos em um painel lateral.",
+      "category": "mod"
+    },
+    {
       "name": "exemplos",
       "source": "./plugins/exemplos",
       "description": "Exemplo de pacote: skill, agente, hook e estilo de saída num plugin só.",
