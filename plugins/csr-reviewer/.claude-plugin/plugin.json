@@ -1,0 +1,12 @@
+{
+  "name": "csr-reviewer",
+  "version": "0.1.0",
+  "description": "Mod: segundo par de olhos para a sessão. Revisa automaticamente cada turno concluído e mostra achados em um painel lateral sem poluir a conversa principal.",
+  "author": {
+    "name": "Cesar Schutz",
+    "url": "https://github.com/cesarschutz"
+  },
+  "homepage": "https://github.com/cesarschutz/claude-code-kit/tree/main/plugins/csr-reviewer",
+  "repository": "https://github.com/cesarschutz/claude-code-kit",
+  "license": "MIT"
+}
