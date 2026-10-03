@@ -68,7 +68,7 @@ no [README do csr-cockpit](plugins/csr-cockpit/).
 claude plugin install csr-reviewer@cesarschutz
 ```
 
-Abre e fecha com `/reviewer`. A revisão automática pode ser ligada ou pausada com `/reviewer on` e `/reviewer off`; `/reviewer run` força uma revisão manual. O painel mostra também os tokens usados pelo fork.
+Abre e fecha com `/reviewer`. Vem **desativado por padrão**. `/reviewer enable` e `/reviewer disable` salvam a preferência global; `/reviewer on` e `/reviewer off` valem só para a sessão atual. `/reviewer help` mostra os dois estados e os comandos; `/reviewer run` executa uma revisão manual. O painel mostra também os tokens usados pelo fork.
 
 ### Exemplos
 

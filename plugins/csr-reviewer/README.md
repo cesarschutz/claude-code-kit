@@ -40,7 +40,9 @@ Abra o Claude Code normalmente e use:
 
 ## Como funciona
 
-1. O mod observa `turn.complete` apenas do agente principal.
+O automático vem **desativado por padrão**. Use `/reviewer on` nesta conversa ou `/reviewer enable` para ativar em todas.
+
+1. Quando ativado, o mod observa `turn.complete` apenas do agente principal.
 2. Depois que o turno terminou, chama `$.model.fork` com um prompt de revisão.
 3. O fork vê o snapshot da conversa já concluída, não recebe ferramentas e não continua a tarefa.
 4. O revisor devolve JSON com resumo e achados.
@@ -51,13 +53,30 @@ O fork compartilha o contexto/prompt cache da sessão. Ele **usa tokens adiciona
 
 ## Comandos
 
+| Comando | Efeito |
+| --- | --- |
+| `/reviewer` | Abre ou fecha o painel; não liga o automático. |
+| `/reviewer enable` | Ativa globalmente e salva para as próximas conversas. |
+| `/reviewer disable` | Desativa globalmente e salva para as próximas conversas. |
+| `/reviewer on` | Ativa apenas nesta conversa. |
+| `/reviewer off` | Desativa apenas nesta conversa. |
+| `/reviewer help` | Mostra ajuda, preferência global e estado efetivo desta conversa. |
+| `/reviewer status` | Mostra apenas os dois estados. |
+| `/reviewer run` | Executa uma revisão manual, mesmo com o automático desligado. |
+| `/reviewer clear` | Limpa o histórico visual. |
+
+A preferência global fica no armazenamento persistente do próprio plugin (`$.store`, chave `autoReviewEnabled`) no diretório de configuração do Claude Code do usuário. Vale para as conversas e projetos que usam esse plugin nessa instalação; não sincroniza entre computadores.
+
+`on/off` têm prioridade sobre o global somente durante a sessão. `enable/disable` removem o override da conversa em que são executados. Outras conversas abertas leem a nova preferência no próximo comando, clique no painel ou turno concluído, mas mantêm um eventual `on/off` próprio. O botão Pause/Resume também altera apenas a sessão. Uma revisão já iniciada pode terminar depois de desligar.
+
+Por exemplo, `/reviewer help` pode mostrar:
+
 ```text
-/reviewer          abre ou fecha o painel
-/reviewer on       liga revisão automática
-/reviewer off      pausa revisão automática
-/reviewer run      roda uma revisão manual
-/reviewer clear    limpa o histórico visual
+Global (todas as conversas): desativado.
+Nesta conversa: ativado (override da sessão).
 ```
+
+Nesse caso, você usou `on` aqui e as demais conversas continuam seguindo o padrão global desligado.
 
 ## O que procura
 
@@ -71,11 +90,10 @@ O fork compartilha o contexto/prompt cache da sessão. Ele **usa tokens adiciona
 
 ## Opções
 
-Os valores padrão são:
+A revisão automática usa a preferência persistente global (desativada quando ainda não foi definida), com override por sessão. A antiga opção `autoReview` deixa de ser usada. As demais opções padrão são:
 
 ```json
 {
-  "autoReview": true,
   "openOnFinding": true,
   "maxReviews": 8,
   "maxFindings": 6
@@ -103,3 +121,13 @@ claude plugin validate ./plugins/csr-reviewer
 ```
 
 Os Mods oficiais usam a mesma estrutura: `.claude-plugin/plugin.json`, `hooks/hooks.json` e um módulo TypeScript que exporta `register`.
+
+## Testes de comportamento
+
+Com Node.js 24 ou mais novo, sem chamar modelos:
+
+```bash
+node --test plugins/csr-reviewer/tests/register.test.mjs
+```
+
+Esses testes usam um host simulado para verificar persistência, precedência, comandos e painel; não substituem a validação no Claude Code real.

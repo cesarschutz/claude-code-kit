@@ -1,4 +1,4 @@
-import type { On, PluginOptions } from 'claude-code'
+import type { EngineInterface, On, PluginOptions } from 'claude-code'
 
 type Severity = 'critical' | 'warning' | 'info'
 type Category =
@@ -39,7 +39,7 @@ type Review = {
 
 type Host = {
   fork: (prompt: string) => Promise<{ text: string; usage: Usage } | null>
-  now: () => number
+  now: () => Promise<number>
   invalidate: () => void
   open: () => Promise<void>
   close: () => Promise<void>
@@ -47,8 +47,9 @@ type Host = {
 }
 
 export const PANE_ID = 'csr-reviewer'
+export const GLOBAL_ENABLED_KEY = 'autoReviewEnabled'
 export const DEFAULTS = {
-  autoReview: true,
+  autoReview: false,
   openOnFinding: true,
   maxReviews: 8,
   maxFindings: 6,
@@ -166,8 +167,6 @@ const color = (severity: Severity): 'red' | 'yellow' | 'cyan' =>
   severity === 'critical' ? 'red' : severity === 'warning' ? 'yellow' : 'cyan'
 
 export function register(on: On, options: PluginOptions = {}) {
-  const autoReview =
-    typeof options.autoReview === 'boolean' ? options.autoReview : DEFAULTS.autoReview
   const openOnFinding =
     typeof options.openOnFinding === 'boolean'
       ? options.openOnFinding
@@ -184,7 +183,28 @@ export function register(on: On, options: PluginOptions = {}) {
   let host: Host | null = null
   let reviews: Review[] = []
   let turn = 0
-  let enabled = autoReview
+  let globalEnabled: boolean = DEFAULTS.autoReview
+  let sessionOverride: boolean | null = null
+  let settingsError: string | null = null
+  const isEnabled = () => sessionOverride ?? globalEnabled
+
+  // Re-read at command/turn boundaries so other open conversations see changes.
+  const refreshGlobal = async ($: EngineInterface) => {
+    try {
+      globalEnabled = (await $.store.get(GLOBAL_ENABLED_KEY)) === true
+      settingsError = null
+    } catch (error) {
+      globalEnabled = false
+      settingsError = error instanceof Error ? error.message : String(error)
+    }
+    invalidate()
+  }
+
+  const statusText = () => [
+    `Global (todas as conversas): ${globalEnabled ? 'ativado' : 'desativado'}.`,
+    `Nesta conversa: ${isEnabled() ? 'ativado' : 'desativado'} (${sessionOverride === null ? 'segue o global' : 'override da sessão'}).`,
+    ...(settingsError ? [`Não foi possível ler a preferência global: ${settingsError}`] : []),
+  ].join('\n')
 
   const current = (): Review | undefined => reviews[reviews.length - 1]
 
@@ -200,12 +220,12 @@ export function register(on: On, options: PluginOptions = {}) {
     invalidate()
   }
 
-  const runReview = (turnNumber: number) => {
+  const runReview = async (turnNumber: number, manual = false) => {
     const h = host
 
-    if (!h || !enabled) return
+    if (!h || (!manual && !isEnabled())) return
 
-    const startedAt = h.now()
+    const startedAt = await h.now()
 
     addReview({
       turn: turnNumber,
@@ -229,6 +249,7 @@ export function register(on: On, options: PluginOptions = {}) {
         }
 
         const parsed = parseReview(result.text, maxFindings)
+        const durationMs = (await h.now()) - startedAt
 
         replaceReview(turnNumber, review => ({
           ...review,
@@ -236,7 +257,7 @@ export function register(on: On, options: PluginOptions = {}) {
           summary: parsed.summary,
           findings: parsed.findings,
           usage: result.usage,
-          durationMs: h.now() - startedAt,
+          durationMs,
         }))
 
         if (
@@ -250,13 +271,14 @@ export function register(on: On, options: PluginOptions = {}) {
           if (!panes.some(pane => pane.id === PANE_ID)) await h.open()
         }
       })
-      .catch((error: unknown) => {
+      .catch(async (error: unknown) => {
+        const durationMs = (await h.now()) - startedAt
         replaceReview(turnNumber, review => ({
           ...review,
           status: 'error',
           summary: 'Reviewer failed.',
           error: error instanceof Error ? error.message : String(error),
-          durationMs: h.now() - startedAt,
+          durationMs,
         }))
       })
   }
@@ -270,7 +292,6 @@ export function register(on: On, options: PluginOptions = {}) {
         await $.ui.open({
           id: PANE_ID,
           title: 'Reviewer',
-          focus: false,
           closeOnEscape: true,
         })
       },
@@ -278,11 +299,14 @@ export function register(on: On, options: PluginOptions = {}) {
       panes: () => $.ui.panes(),
     }
 
+    sessionOverride = null
+    await refreshGlobal($)
+
     await $.command.register({
       name: 'reviewer',
       description:
-        'Abre/fecha o painel do revisor paralelo; use /reviewer on|off|run|clear',
-      argumentHint: '[on|off|run|clear]',
+        'Painel e revisão paralela; /reviewer help mostra comandos e estados',
+      argumentHint: '[help|status|enable|disable|on|off|run|clear]',
       immediate: true,
     })
 
@@ -292,16 +316,48 @@ export function register(on: On, options: PluginOptions = {}) {
   on('command.run', { command: 'reviewer' }, async ($, e) => {
     const arg = e.args.trim().toLowerCase()
 
-    if (arg === 'on') {
-      enabled = true
-      $.ui.toast('csr-reviewer: revisão automática ligada')
-      return {}
+    await refreshGlobal($)
+
+    if (arg === 'enable' || arg === 'disable') {
+      const value = arg === 'enable'
+      try {
+        await $.store.set(GLOBAL_ENABLED_KEY, value)
+      } catch (error) {
+        return { text: `Não foi possível salvar a preferência global: ${String(error)}` }
+      }
+      globalEnabled = value
+      sessionOverride = null
+      settingsError = null
+      invalidate()
+      return { text: statusText() }
     }
 
-    if (arg === 'off') {
-      enabled = false
-      $.ui.toast('csr-reviewer: revisão automática desligada')
-      return {}
+    if (arg === 'on' || arg === 'off') {
+      sessionOverride = arg === 'on'
+      invalidate()
+      return { text: statusText() }
+    }
+
+    if (arg === 'help' || arg === 'status' || arg === '--help' || arg === '-h') {
+      return { text: statusText() + (arg === 'status' ? '' : `
+
+/reviewer          abre ou fecha o painel
+/reviewer enable   ativa globalmente e persiste entre conversas
+/reviewer disable  desativa globalmente e persiste entre conversas
+/reviewer on       ativa apenas nesta conversa
+/reviewer off      desativa apenas nesta conversa
+/reviewer help     mostra esta ajuda e os dois estados
+/reviewer status   mostra apenas os dois estados
+/reviewer run      revisão manual única, mesmo com automático desligado
+/reviewer clear    limpa o histórico visual
+
+on/off prevalecem sobre o global até a sessão terminar.
+enable/disable removem o override desta conversa; outras mantêm seus overrides.
+Uma revisão já iniciada pode terminar após desligar.`) }
+    }
+
+    if (arg && !['run', 'clear'].includes(arg)) {
+      return { text: `Comando desconhecido: ${arg}. Use /reviewer help.` }
     }
 
     if (arg === 'clear') {
@@ -311,7 +367,7 @@ export function register(on: On, options: PluginOptions = {}) {
     }
 
     if (arg === 'run') {
-      runReview(Math.max(1, turn))
+      await runReview(Math.max(1, turn), true)
       await host?.open()
       return {}
     }
@@ -330,8 +386,9 @@ export function register(on: On, options: PluginOptions = {}) {
     if (e.agentId === undefined) {
       turn += 1
 
-      if (enabled && e.reason === 'answer' && !e.isAborted) {
-        runReview(turn)
+      await refreshGlobal($)
+      if (isEnabled() && e.reason === 'answer' && !e.isAborted) {
+        await runReview(turn)
       }
     }
 
@@ -348,7 +405,7 @@ export function register(on: On, options: PluginOptions = {}) {
       gap: 1,
       children: [
         Text({ bold: true, children: 'SECOND REVIEW' }),
-        Text({ dimColor: true, children: enabled ? 'auto on' : 'auto off' }),
+        Text({ dimColor: true, wrap: 'wrap', children: `global ${globalEnabled ? 'on' : 'off'} · sessão ${isEnabled() ? 'on' : 'off'}${sessionOverride === null ? ' (global)' : ' (override)'}` }),
       ],
     })
 
@@ -360,7 +417,7 @@ export function register(on: On, options: PluginOptions = {}) {
         Button({ key: 'run', label: 'Review now', onPress: () => undefined }),
         Button({
           key: 'toggle',
-          label: enabled ? 'Pause' : 'Resume',
+          label: isEnabled() ? 'Pause session' : 'Resume session',
           onPress: () => undefined,
         }),
         Button({ key: 'clear', label: 'Clear', onPress: () => undefined }),
@@ -380,7 +437,7 @@ export function register(on: On, options: PluginOptions = {}) {
                 dimColor: true,
                 wrap: 'wrap',
                 children:
-                  'No review yet. Completed main-agent turns are reviewed outside the main transcript.',
+                  'Nenhuma revisão ainda. Use /reviewer on nesta conversa ou /reviewer enable para todas. /reviewer help mostra os estados.',
               }),
             ],
           }),
@@ -468,14 +525,15 @@ export function register(on: On, options: PluginOptions = {}) {
     })
   })
 
-  on('ui.press', { plugin: 'csr-reviewer' }, ($, e, next) => {
+  on('ui.press', { plugin: 'csr-reviewer' }, async ($, e, next) => {
+    await refreshGlobal($)
     if (e.element === 'run') {
-      runReview(Math.max(1, turn))
+      await runReview(Math.max(1, turn), true)
       return { element: e.element }
     }
 
     if (e.element === 'toggle') {
-      enabled = !enabled
+      sessionOverride = !isEnabled()
       invalidate()
       return { element: e.element }
     }

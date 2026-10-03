@@ -1,7 +1,7 @@
 {
   "name": "csr-reviewer",
-  "version": "0.1.0",
-  "description": "Mod: segundo par de olhos para a sessão. Revisa automaticamente cada turno concluído e mostra achados em um painel lateral sem poluir a conversa principal.",
+  "version": "0.2.0",
+  "description": "Mod: segundo par de olhos com revisão paralela em painel. Automático desativado por padrão, preferência global persistente e controle por sessão.",
   "author": {
     "name": "Cesar Schutz",
     "url": "https://github.com/cesarschutz"
