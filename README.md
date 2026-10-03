@@ -60,6 +60,16 @@ claude plugin install csr-cockpit@cesarschutz
 Abre e fecha com `/cockpit`. Pede o Claude Code 2.1.287 ou mais novo. Detalhes, teclas e limites
 no [README do csr-cockpit](plugins/csr-cockpit/).
 
+### [csr-reviewer](plugins/csr-reviewer/)
+
+<img src="docs/arte/selo-mod.svg" height="20" alt="mod"> Um segundo par de olhos para a sessão. Depois que o agente principal conclui um turno, cria um fork somente-leitura da própria conversa, procura riscos ou pontos esquecidos e mostra os achados num painel lateral sem poluir o transcript principal.
+
+```bash
+claude plugin install csr-reviewer@cesarschutz
+```
+
+Abre e fecha com `/reviewer`. A revisão automática pode ser ligada ou pausada com `/reviewer on` e `/reviewer off`; `/reviewer run` força uma revisão manual. O painel mostra também os tokens usados pelo fork.
+
 ### Exemplos
 
 Peças pequenas, uma de cada tipo, para aprender o formato ou copiar como ponto de partida. Cada
