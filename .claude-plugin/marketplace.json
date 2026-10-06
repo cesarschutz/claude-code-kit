@@ -1,0 +1,94 @@
+{
+  "name": "cesarschutz",
+  "description": "Caixa de ferramentas do Cesar Schutz para o Claude Code: mods, skills, agentes, hooks, estilos de saída e temas",
+  "owner": {
+    "name": "Cesar Schutz"
+  },
+  "renames": {
+    "cs-cockpit": "csr-lens",
+    "csr-cockpit": "csr-lens"
+  },
+  "plugins": [
+    {
+      "name": "csr-lens",
+      "source": "./plugins/csr-lens",
+      "description": "Mod: painel ao lado da conversa com visão geral, agentes (quem chamou quem, recados e rodadas), turnos, diffs como no VS Code, árvore de arquivos ao vivo, contexto e custo e inventário de plugins, e uma linha de resumo acima do prompt. Só observa, a não ser quando você manda parar um agente.",
+      "category": "mod"
+    },
+    {
+      "name": "exemplos",
+      "source": "./plugins/exemplos",
+      "description": "Exemplo de pacote: skill, agente, hook e estilo de saída num plugin só.",
+      "category": "pacote"
+    },
+    {
+      "name": "mensagem-de-commit",
+      "source": "./skills/mensagem-de-commit",
+      "description": "Exemplo de skill: escreve a mensagem de commit para o que está no stage, sem commitar.",
+      "category": "skill",
+      "skills": [
+        "./"
+      ]
+    },
+    {
+      "name": "explicar-erro",
+      "source": "./skills/explicar-erro",
+      "description": "Exemplo de skill: explica um erro ou stack trace em português claro e aponta a causa provável.",
+      "category": "skill",
+      "skills": [
+        "./"
+      ]
+    },
+    {
+      "name": "pesquisador",
+      "source": "./agents",
+      "description": "Exemplo de agente: localiza no código onde algo é feito e devolve um mapa com arquivos e linhas. Só lê.",
+      "category": "agente",
+      "agents": [
+        "./pesquisador.md"
+      ]
+    },
+    {
+      "name": "critico",
+      "source": "./agents",
+      "description": "Exemplo de agente: segunda opinião sobre um plano ou decisão, procurando o que pode dar errado. Só lê.",
+      "category": "agente",
+      "agents": [
+        "./critico.md"
+      ]
+    },
+    {
+      "name": "professor",
+      "source": "./output-styles",
+      "description": "Exemplo de estilo de saída: explica o porquê de cada passo, para quem está aprendendo.",
+      "category": "estilo",
+      "outputStyles": [
+        "./professor.md"
+      ]
+    },
+    {
+      "name": "tinta-azul",
+      "source": "./themes/tinta-azul",
+      "description": "Exemplo de tema: cores do terminal com o destaque em azul, sobre o tema escuro.",
+      "category": "tema"
+    },
+    {
+      "name": "responder-em-portugues",
+      "source": "./hooks/responder-em-portugues",
+      "description": "Exemplo de hook: no início de cada sessão, pede ao Claude que responda em português do Brasil.",
+      "category": "hook",
+      "hooks": {
+        "SessionStart": [
+          {
+            "hooks": [
+              {
+                "type": "command",
+                "command": "echo 'Responda sempre em português do Brasil.'"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

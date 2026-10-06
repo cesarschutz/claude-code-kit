@@ -1,0 +1,22 @@
+{
+  "name": "csr-lens",
+  "version": "1.0.0",
+  "description": "Painel ao lado da conversa com visão geral, agentes (quem chamou quem, recados e rodadas), turnos, diffs como no VS Code, árvore de arquivos ao vivo, contexto e custo e inventário de plugins, e uma linha de resumo acima do prompt. Só observa, a não ser quando você manda parar um agente.",
+  "author": {
+    "name": "Cesar Schutz",
+    "url": "https://github.com/cesarschutz"
+  },
+  "homepage": "https://github.com/cesarschutz/claude-code-kit/tree/main/plugins/csr-lens",
+  "repository": "https://github.com/cesarschutz/claude-code-kit",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "cotacaoDoDolar": {
+      "type": "number",
+      "title": "Cotação do dólar em reais",
+      "description": "Quantos reais vale um dólar, para o custo da aba Contexto aparecer também em reais (o Lens não busca a cotação na internet). 0 esconde o valor em reais.",
+      "default": 5.22,
+      "min": 0
+    }
+  }
+}

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 405" width="860" height="405" role="img" aria-label="claude-code-kit: dois comandos para instalar e o catálogo de mods, skills, agentes, hooks, estilos e temas">
+<title>claude-code-kit: dois comandos para instalar e o catálogo de mods, skills, agentes, hooks, estilos e temas</title>
+<style>
+:root{color-scheme:light;--fundo:#f6f8fa;--texto:#1f2328;--cinza:#636c76;--traco:#d0d7de;--lavanda:#5769f7;--laranja:#bc4c00;--verde:#1a7f37;--vermelho:#cf222e;--selo:#dde0ea;--selo-forte:#c9cff7;--selo-texto:#1f2328}@media not all{:root{--fundo:#262626;--texto:#e8e8e8;--cinza:#999999;--traco:#4a4a4a;--lavanda:#b1b9f9;--laranja:#d77757;--verde:#4eba65;--vermelho:#ff6b80;--selo:#b4b4b4;--selo-forte:#b1b9f9;--selo-texto:#262626}}
+text{font:13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;white-space:pre}
+.n{font-weight:700}
+.t0{transform:translateX(448.6px);animation:t0 1.71s steps(57) 0.40s both}@keyframes t0{from{transform:translateX(0)}to{transform:translateX(448.6px)}}
+.t1{transform:translateX(331.6px);animation:t1 1.26s steps(42) 2.46s both}@keyframes t1{from{transform:translateX(0)}to{transform:translateX(331.6px)}}
+@keyframes surgir{from{opacity:0}to{opacity:1}}
+.i0{animation:surgir .35s 4.07s both}
+.i1{animation:surgir .35s 4.16s both}
+.i2{animation:surgir .35s 4.25s both}
+.i3{animation:surgir .35s 4.34s both}
+.i4{animation:surgir .35s 4.43s both}
+.i5{animation:surgir .35s 4.52s both}
+.i6{animation:surgir .35s 4.61s both}
+.i7{animation:surgir .35s 4.70s both}
+.i8{animation:surgir .35s 4.79s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<clipPath id="cartao"><rect width="860" height="405" rx="10"/></clipPath>
+<g clip-path="url(#cartao)">
+<rect width="860" height="405" style="fill:var(--fundo)"/>
+<rect x="28.0" y="31.0" width="39.0" height="18.5" style="fill:var(--lavanda)"/>
+<text x="35.8" y="44" style="fill:var(--fundo)" textLength="23.4" lengthAdjust="spacing" xml:space="preserve" class="n">CSR</text>
+<text x="74.8" y="44" style="fill:var(--texto)" textLength="117.0" lengthAdjust="spacing" xml:space="preserve" class="n">claude-code-kit</text>
+<text x="28.0" y="67" style="fill:var(--cinza)" textLength="452.4" lengthAdjust="spacing" xml:space="preserve">mods · skills · agentes · hooks · estilos de saída · temas</text>
+<path d="M28 84L832 84" style="stroke:var(--traco)" stroke-width="1"/>
+<path d="M29.5 107.4l3.9 3.9l-3.9 3.9" fill="none" style="stroke:var(--lavanda)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="43.6" y="116" style="fill:var(--texto)" textLength="444.6" lengthAdjust="spacing" xml:space="preserve">claude plugin marketplace add cesarschutz/claude-code-kit</text>
+<rect class="tampa t0" x="42.6" y="103" width="448.6" height="19" style="fill:var(--fundo)"/>
+<path d="M29.5 130.4l3.9 3.9l-3.9 3.9" fill="none" style="stroke:var(--lavanda)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="43.6" y="139" style="fill:var(--texto)" textLength="327.6" lengthAdjust="spacing" xml:space="preserve">claude plugin install csr-lens@cesarschutz</text>
+<rect class="tampa t1" x="42.6" y="126" width="331.6" height="19" style="fill:var(--fundo)"/>
+<g class="item i0">
+<path d="M29.0 177.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="186" style="fill:var(--texto)" textLength="62.4" lengthAdjust="spacing" xml:space="preserve" class="n">csr-lens</text>
+<text x="238.6" y="186" style="fill:var(--lavanda)" textLength="23.4" lengthAdjust="spacing" xml:space="preserve">mod</text>
+<text x="308.8" y="186" style="fill:var(--cinza)" textLength="507.0" lengthAdjust="spacing" xml:space="preserve">painel ao lado da conversa com visão geral, agentes (quem chamou…</text>
+</g>
+<g class="item i1">
+<path d="M29.0 200.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="209" style="fill:var(--texto)" textLength="62.4" lengthAdjust="spacing" xml:space="preserve">exemplos</text>
+<text x="238.6" y="209" style="fill:var(--cinza)" textLength="46.8" lengthAdjust="spacing" xml:space="preserve">pacote</text>
+<text x="308.8" y="209" style="fill:var(--cinza)" textLength="397.8" lengthAdjust="spacing" xml:space="preserve">skill, agente, hook e estilo de saída num plugin só</text>
+</g>
+<g class="item i2">
+<path d="M29.0 223.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="232" style="fill:var(--texto)" textLength="140.4" lengthAdjust="spacing" xml:space="preserve">mensagem-de-commit</text>
+<text x="238.6" y="232" style="fill:var(--cinza)" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">skill</text>
+<text x="308.8" y="232" style="fill:var(--cinza)" textLength="460.2" lengthAdjust="spacing" xml:space="preserve">escreve a mensagem de commit para o que está no stage, sem…</text>
+</g>
+<g class="item i3">
+<path d="M29.0 246.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="255" style="fill:var(--texto)" textLength="101.4" lengthAdjust="spacing" xml:space="preserve">explicar-erro</text>
+<text x="238.6" y="255" style="fill:var(--cinza)" textLength="39.0" lengthAdjust="spacing" xml:space="preserve">skill</text>
+<text x="308.8" y="255" style="fill:var(--cinza)" textLength="475.8" lengthAdjust="spacing" xml:space="preserve">explica um erro ou stack trace em português claro e aponta a…</text>
+</g>
+<g class="item i4">
+<path d="M29.0 269.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="278" style="fill:var(--texto)" textLength="85.8" lengthAdjust="spacing" xml:space="preserve">pesquisador</text>
+<text x="238.6" y="278" style="fill:var(--cinza)" textLength="46.8" lengthAdjust="spacing" xml:space="preserve">agente</text>
+<text x="308.8" y="278" style="fill:var(--cinza)" textLength="460.2" lengthAdjust="spacing" xml:space="preserve">localiza no código onde algo é feito e devolve um mapa com…</text>
+</g>
+<g class="item i5">
+<path d="M29.0 292.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="301" style="fill:var(--texto)" textLength="54.6" lengthAdjust="spacing" xml:space="preserve">critico</text>
+<text x="238.6" y="301" style="fill:var(--cinza)" textLength="46.8" lengthAdjust="spacing" xml:space="preserve">agente</text>
+<text x="308.8" y="301" style="fill:var(--cinza)" textLength="507.0" lengthAdjust="spacing" xml:space="preserve">segunda opinião sobre um plano ou decisão, procurando o que pode…</text>
+</g>
+<g class="item i6">
+<path d="M29.0 315.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="324" style="fill:var(--texto)" textLength="70.2" lengthAdjust="spacing" xml:space="preserve">professor</text>
+<text x="238.6" y="324" style="fill:var(--cinza)" textLength="46.8" lengthAdjust="spacing" xml:space="preserve">estilo</text>
+<text x="308.8" y="324" style="fill:var(--cinza)" textLength="444.6" lengthAdjust="spacing" xml:space="preserve">explica o porquê de cada passo, para quem está aprendendo</text>
+</g>
+<g class="item i7">
+<path d="M29.0 338.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="347" style="fill:var(--texto)" textLength="78.0" lengthAdjust="spacing" xml:space="preserve">tinta-azul</text>
+<text x="238.6" y="347" style="fill:var(--cinza)" textLength="31.2" lengthAdjust="spacing" xml:space="preserve">tema</text>
+<text x="308.8" y="347" style="fill:var(--cinza)" textLength="475.8" lengthAdjust="spacing" xml:space="preserve">cores do terminal com o destaque em azul, sobre o tema escuro</text>
+</g>
+<g class="item i8">
+<path d="M29.0 361.9v7.3l5.5 -3.6z" style="fill:var(--cinza)"/>
+<text x="43.6" y="370" style="fill:var(--texto)" textLength="171.6" lengthAdjust="spacing" xml:space="preserve">responder-em-portugues</text>
+<text x="238.6" y="370" style="fill:var(--cinza)" textLength="31.2" lengthAdjust="spacing" xml:space="preserve">hook</text>
+<text x="308.8" y="370" style="fill:var(--cinza)" textLength="444.6" lengthAdjust="spacing" xml:space="preserve">no início de cada sessão, pede ao Claude que responda em…</text>
+</g>
+</g>
+<rect x=".5" y=".5" width="859" height="404" rx="9.5" fill="none" style="stroke:var(--traco)"/>
+</svg>

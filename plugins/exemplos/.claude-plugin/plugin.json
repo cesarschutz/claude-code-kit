@@ -1,0 +1,11 @@
+{
+  "name": "exemplos",
+  "version": "0.1.0",
+  "description": "Um exemplo de cada peça que um plugin pode levar: skill, agente, hook e estilo de saída.",
+  "author": {
+    "name": "Cesar Schutz",
+    "url": "https://github.com/cesarschutz"
+  },
+  "repository": "https://github.com/cesarschutz/claude-code-kit",
+  "license": "MIT"
+}

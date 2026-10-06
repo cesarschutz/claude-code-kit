@@ -1,0 +1,9 @@
+{
+  "name": "Tinta azul",
+  "base": "dark",
+  "overrides": {
+    "claude": "#6ea8fe",
+    "success": "#5fd38d",
+    "error": "#ff6b6b"
+  }
+}
