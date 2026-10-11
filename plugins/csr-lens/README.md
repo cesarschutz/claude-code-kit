@@ -163,7 +163,7 @@ os mesmos números viram barras de texto.
 
 A aba em que o painel abre. Cada bloco leva à aba que fala dele.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="../../docs/arte/telas/visao-geral-escuro.svg"><img src="../../docs/arte/telas/visao-geral-claro.svg" width="720" alt="A Visão geral com as marcas numeradas: os indicadores, o que está rodando agora, os agentes disponíveis, o grafo, o último turno e as últimas edições"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="../../docs/arte/telas/visao-geral-escuro.svg"><img src="../../docs/arte/telas/visao-geral-claro.svg" width="720" alt="A Visão geral com as marcas numeradas: os indicadores, o que está rodando agora, o grafo, o último turno, as últimas edições e os agentes disponíveis"></picture>
 
 1. **Os indicadores:** o contexto (com a barra até a compactação), o custo da sessão e o do último
    turno, o limite de uso de 5 horas, os agentes (rodando, concluídos, com
@@ -171,14 +171,14 @@ A aba em que o painel abre. Cada bloco leva à aba que fala dele.
 2. **Agora:** se a conversa principal está pensando (e há quanto tempo) ou parada, cada agente
    rodando com o que ele faz neste momento (e, se ele já rodou antes, em que rodada está) e os
    arquivos sendo lidos ou escritos.
-3. **Agentes disponíveis:** os agentes instalados, globais, do projeto e de plugin, desde o começo da
-   sessão, mesmo os que ninguém chamou (veja a [aba Agentes](#2-agentes)).
-4. **Quem chamou quem:** o mesmo grafo da aba Agentes, sem os controles.
-5. **O último turno:** o seu pedido, os números dele, os agentes que ele chamou (uma linha por
+3. **Quem chamou quem:** o mesmo grafo da aba Agentes, sem os controles.
+4. **O último turno:** o seu pedido, os números dele, os agentes que ele chamou (uma linha por
    agente ou, de um agente que rodou mais de uma vez, uma linha por rodada) e o começo da resposta,
    formatado. Clicar no cartão abre o turno.
-6. **As últimas edições:** cada arquivo editado na sessão com a edição mais recente; `▸ diff` abre o
+5. **As últimas edições:** cada arquivo editado na sessão com a edição mais recente; `▸ diff` abre o
    diff ali mesmo, e o nome leva à aba Diffs.
+6. **Agentes disponíveis:** no fim da aba, os agentes instalados, globais, do projeto e de plugin,
+   desde o começo da sessão, mesmo os que ninguém chamou (veja a [aba Agentes](#2-agentes)).
 
 ### 2 Agentes
 

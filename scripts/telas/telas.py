@@ -132,10 +132,10 @@ TELAS = {
         "marcas": [
             ("Indicadores:", "alt"),
             ("▾ Agora", "alt"),
-            ("▾ Agentes disponíveis", "alt"),
             ("▾ Quem chamou quem", "alt"),
             ("▾ Último turno", "alt"),
             ("▾ Últimas edições", "alt"),
+            ("▾ Agentes disponíveis", "alt"),
         ],
     },
     "agentes": {

@@ -1,6 +1,6 @@
 {
   "name": "csr-lens",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Painel ao lado da conversa com visão geral, agentes (quem chamou quem, recados e rodadas), turnos, diffs como no VS Code, árvore de arquivos ao vivo, contexto e custo e inventário de plugins, e uma linha de resumo acima do prompt. Só observa, a não ser quando você manda parar um agente.",
   "author": {
     "name": "Cesar Schutz",

@@ -312,7 +312,6 @@ export const abaVisaoGeral = (
         </Box>
       )}
       {secaoQueDobra(el, dobra, 'visao:agora', { texto: 'Agora', cor: COR_DA_VISAO, contagem: rodando.length > 0 ? `· ${rodando.length} rodando` : '' }, [agora])}
-      {disponiveis}
       {grafo !== null &&
         !quadro.isCompacto &&
         secaoQueDobra(el, dobra, 'visao:grafo', { texto: 'Quem chamou quem', cor: COR.ciano, contagem: dados.agentes.length === 0 ? '· nenhum agente ainda' : `· ${dados.agentes.length}` }, [grafo])}
@@ -423,6 +422,7 @@ export const abaVisaoGeral = (
           )
         }),
       ])}
+      {disponiveis}
     </Box>
   )
 }
